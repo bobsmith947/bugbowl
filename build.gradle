@@ -1,0 +1,51 @@
+plugins {
+	id 'org.jetbrains.kotlin.multiplatform' version '1.5.10'
+	id 'com.bmuschko.tomcat' version '2.5'
+}
+
+repositories {
+	mavenCentral()
+	maven { url "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven" }
+}
+
+kotlin {
+	jvm {
+		withJava()
+	}
+	js {
+		browser {
+			binaries.executable()
+		}
+	}
+	sourceSets {
+		commonMain {
+			kotlin.srcDirs += 'src/commonMain'
+		}
+		jsMain {
+			kotlin.srcDirs += 'src/jsMain'
+			dependencies {
+				implementation 'org.jetbrains.kotlinx:kotlinx-html-js:0.7.2'
+			}
+		}
+		jvmMain {
+			kotlin.srcDirs += 'src/jvmMain'
+			dependencies {
+				implementation 'org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.2'
+				compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+			}
+		}
+	}
+}
+
+dependencies {
+	def tomcatVersion = '8.5.39'
+	tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+			"org.apache.tomcat.embed:tomcat-embed-logging-juli:8.5.2",
+			"org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
+}
+
+tomcat {
+	httpProtocol = 'org.apache.coyote.http11.Http11Nio2Protocol'
+	ajpProtocol  = 'org.apache.coyote.ajp.AjpNio2Protocol'
+	webAppDirName = 'web'
+}
