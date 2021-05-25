@@ -1,6 +1,9 @@
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
 plugins {
 	id 'org.jetbrains.kotlin.multiplatform' version '1.5.10'
 	id 'com.bmuschko.tomcat' version '2.5'
+	id 'eclipse-wtp'
 }
 
 repositories {
@@ -48,4 +51,26 @@ tomcat {
 	httpProtocol = 'org.apache.coyote.http11.Http11Nio2Protocol'
 	ajpProtocol  = 'org.apache.coyote.ajp.AjpNio2Protocol'
 	webAppDirName = 'web'
+}
+
+eclipse {
+	project {
+		natures 'org.jetbrains.kotlin.core.kotlinNature'
+		buildCommand 'org.jetbrains.kotlin.ui.kotlinBuilder'
+	}
+	classpath {
+		downloadSources = true
+		downloadJavadoc = true
+		file.whenMerged { cp ->
+			cp.entries.add(new SourceFolder('src/commonMain', null))
+			cp.entries.add(new SourceFolder('src/jsMain', null))
+			cp.entries.add(new SourceFolder('src/jvmMain', null))
+		}
+	}
+	wtp {
+		facet {
+			facet name: 'jst.web', version: '4.0'
+			facet name: 'jst.java', version: '11'
+		}
+	}
 }
