@@ -18,6 +18,12 @@ kotlin {
 	js {
 		browser {
 			binaries.executable()
+			webpackTask {
+				outputFileName = 'index.js'
+			}
+			distribution {
+				directory = file("$projectDir/web/")
+			}
 		}
 	}
 	sourceSets {
@@ -63,7 +69,7 @@ eclipse {
 		downloadJavadoc = true
 		file.whenMerged { cp ->
 			cp.entries.add(new SourceFolder('src/commonMain', null))
-			cp.entries.add(new SourceFolder('src/jsMain', null))
+			//cp.entries.add(new SourceFolder('src/jsMain', null))
 			cp.entries.add(new SourceFolder('src/jvmMain', null))
 		}
 	}
