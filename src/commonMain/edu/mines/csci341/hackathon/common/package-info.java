@@ -1,1 +1,0 @@
-package edu.mines.csci341.hackathon.common;
