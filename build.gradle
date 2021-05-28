@@ -2,6 +2,7 @@ import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
 plugins {
 	id 'org.jetbrains.kotlin.multiplatform' version '1.5.10'
+	id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.0'
 	id 'com.bmuschko.tomcat' version '2.5'
 	id 'eclipse-wtp'
 }
@@ -22,13 +23,17 @@ kotlin {
 				outputFileName = 'index.js'
 			}
 			distribution {
-				directory = file("$projectDir/web/")
+				directory = file('web')
 			}
 		}
 	}
 	sourceSets {
 		commonMain {
 			kotlin.srcDirs += 'src/commonMain'
+			dependencies {
+				implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1'
+				implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.2.1'
+			}
 		}
 		jsMain {
 			kotlin.srcDirs += 'src/jsMain'
@@ -43,6 +48,13 @@ kotlin {
 				compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
 			}
 		}
+	}
+}
+
+compileKotlinJvm {
+	kotlinOptions {
+		jvmTarget = "11"
+		classpath += fileTree('web/WEB-INF/lib') { include '*.jar' }
 	}
 }
 
