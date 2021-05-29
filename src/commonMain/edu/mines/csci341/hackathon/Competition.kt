@@ -24,4 +24,26 @@ data class Competition(
 			8..12 -> "Fall ${created.year}"
 			else -> throw IllegalStateException()
 		}
+
+	companion object {
+		val comps = listOf(
+			Competition(1, "Test 1", "Test Description", "Test Contents", "2020-08-29".toLocalDate()),
+			Competition(2, "Test 2", "Test Description", "Test Contents", "2021-01-29".toLocalDate()),
+			Competition(3, "Test 3", "Test Description", "Test Contents", "2021-05-29".toLocalDate(), false),
+		)
+		init {
+			comps[0].apply {
+				expectedResults = listOf("1" to "2")
+				participants = User.users
+			}
+			comps[1].apply {
+				expectedResults = listOf("2" to "3")
+				participants = User.users
+			}
+			comps[2].apply {
+				expectedResults = listOf("3" to "4")
+				participants = User.users
+			}
+		}
+	}
 }
