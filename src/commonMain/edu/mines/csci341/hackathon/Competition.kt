@@ -4,6 +4,8 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.Serializable
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.toLocalDate
 
 @Serializable
 data class Competition(
@@ -19,9 +21,9 @@ data class Competition(
 	var participants: List<User> = listOf()
 	val semester: String
 		get() = when (created.monthNumber) {
-			1..4 -> "Spring ${created.year}"
-			5..7 -> "Summer ${created.year}"
-			8..12 -> "Fall ${created.year}"
+			in 1..4 -> "Spring ${created.year}"
+			in 5..7 -> "Summer ${created.year}"
+			in 8..12 -> "Fall ${created.year}"
 			else -> throw IllegalStateException()
 		}
 
