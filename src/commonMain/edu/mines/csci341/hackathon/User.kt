@@ -8,5 +8,5 @@ data class User(
 	val name: String,
 	val isAdmin: Boolean = false,
 ) {
-	val submissions: MutableList<Submission> = mutableListOf()
+	var submissions: List<Submission> = listOf()
 }
