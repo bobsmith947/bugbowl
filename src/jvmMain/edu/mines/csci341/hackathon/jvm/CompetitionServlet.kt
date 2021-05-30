@@ -9,12 +9,15 @@ import kotlinx.html.*
 import edu.mines.csci341.hackathon.jvm.Templates.makeHead
 import edu.mines.csci341.hackathon.jvm.Templates.makeNav
 import edu.mines.csci341.hackathon.jvm.Templates.makeCompTable
+import edu.mines.csci341.hackathon.jvm.Templates.makeCompSubmit
 
 @WebServlet("/competition")
 class CompetitionServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
+		val compId: String? = req.getParameter("id")
+		val userId = req.getSession(false).getAttribute("userId") as Int
 		res.setContentType("text/html")
 		res.getWriter().use { out ->
 			out.println("<!DOCTYPE html>")
@@ -22,7 +25,11 @@ class CompetitionServlet : HttpServlet() {
 				makeHead("Competition")
 				body {
 					makeNav()
-					makeCompTable()
+					if (compId == null) {
+						makeCompTable()
+					} else {
+						makeCompSubmit(compId.toInt(), userId)
+					}
 				}
 			}
 		}

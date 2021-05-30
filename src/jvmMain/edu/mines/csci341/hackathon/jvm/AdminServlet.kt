@@ -9,12 +9,14 @@ import kotlinx.html.*
 import edu.mines.csci341.hackathon.jvm.Templates.makeHead
 import edu.mines.csci341.hackathon.jvm.Templates.makeNav
 import edu.mines.csci341.hackathon.jvm.Templates.makeCompTable
+import edu.mines.csci341.hackathon.jvm.Templates.makeCompEdit
 
 @WebServlet("/admin")
 class AdminServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
+		val compId: String? = req.getParameter("id")
 		res.setContentType("text/html")
 		res.getWriter().use { out ->
 			out.println("<!DOCTYPE html>")
@@ -22,8 +24,23 @@ class AdminServlet : HttpServlet() {
 				makeHead("Admin")
 				body {
 					makeNav()
-					makeCompTable()
+					if (compId == null) {
+						makeCompTable(edit = true)
+					} else {
+						makeCompEdit(compId.toInt())
+					}
 				}
+			}
+		}
+	}
+	
+	@Throws(ServletException::class, IOException::class)
+	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
+		res.setContentType("text/plain")
+		res.getWriter().use { out ->
+			req.getParameterMap().forEach { (k, v) ->
+				out.print("$k: ")
+				out.println(v[0])
 			}
 		}
 	}
