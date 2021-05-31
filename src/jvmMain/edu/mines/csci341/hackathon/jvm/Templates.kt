@@ -48,8 +48,8 @@ object Templates {
 		tbody {
 			comps.forEach { comp ->
 				tr {
-					if (!comp.isActive) {
-						classes += "table-warning"
+					if (comp.isActive) {
+						classes += "table-active"
 					}
 					td { +comp.title }
 					td { +comp.description }
