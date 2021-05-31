@@ -6,14 +6,35 @@ import edu.mines.csci341.hackathon.*
 object Templates {
 	const val APP_NAME = "OrgaBOWL"
 	
+	fun FlowOrInteractiveOrPhrasingContent
+			.formLabel(block: LABEL.() -> Unit) = label("form-label", block)
+	fun FlowOrInteractiveOrPhrasingContent
+			.formCheckLabel(block: LABEL.() -> Unit) = label("form-check-label", block)
+	
 	fun HTML.makeHead(title: String) = head {
 		meta(charset = "UTF-8")
 		meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
 		title { +"$APP_NAME: $title"}
+		link(
+			"https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css",
+			LinkRel.stylesheet,
+			LinkType.textCss
+		)
+		style {
+			unsafe {
+				raw(
+"""
+body {
+	padding: 50px;
+}
+"""
+				)
+			}
+		}
 	}
 	
-	fun BODY.makeNav() = nav(classes = "navbar fixed-top navbar-dark bg-primary navbar-expand-md") {
-		div(classes = "container") {
+	fun BODY.makeNav() = nav("navbar fixed-top navbar-dark bg-primary navbar-expand-md") {
+		div("container") {
 			a("./", classes = "navbar-brand") { +APP_NAME }
 		}
 	}
@@ -21,7 +42,7 @@ object Templates {
 	fun BODY.makeCompTable(
 		comps: List<Competition> = Competition.comps,
 		edit: Boolean = false
-	) = table {
+	) = table("table") {
 		thead {
 			tr {
 				th { +"Title" }
@@ -61,42 +82,50 @@ object Templates {
 		h1 { +"Edit Competition ${comp.id}" }
 		form(method = FormMethod.post) {
 			hiddenInput(name = "id") { value = comp.id.toString() }
-			label() {
-				htmlFor = "title"
-				+"Title"
+			div {
+				formLabel {
+					htmlFor = "title"
+					+"Title"
+				}
+				textInput(name = "title", classes = "form-control") {
+					id = "title"
+					value = comp.title
+				}
 			}
-			textInput(name = "title") {
-				id = "title"
-				value = comp.title
+			div {
+				formLabel {
+					htmlFor = "description"
+					+"Description"
+				}
+				textArea("4", "40", TextAreaWrap.soft, "form-control") {
+					id = "description"
+					name = "description"
+					+comp.description
+				}
 			}
-			label() {
-				htmlFor = "description"
-				+"Description"
+			div {
+				formLabel {
+					htmlFor = "contents"
+					+"Base code contents"
+				}
+				textArea("8", "80", TextAreaWrap.hard, "form-control") {
+					id = "contents"
+					name = "contents"
+					+comp.contents
+				}
 			}
-			textArea("4", "50") {
-				id = "description"
-				name = "description"
-				+comp.description
+			div("form-check") {
+				checkBoxInput(name = "isActive", classes = "form-check-input") {
+					id = "active"
+					value = "true"
+					checked = comp.isActive
+				}
+				formCheckLabel {
+					htmlFor = "active"
+					+"Active"
+				}
 			}
-			label() {
-				htmlFor = "contents"
-				+"Base code contents"
-			}
-			textArea("8", "80") {
-				id = "contents"
-				name = "contents"
-				+comp.contents
-			}
-			label() {
-				htmlFor = "active"
-				+"Active"
-			}
-			checkBoxInput(name = "isActive") {
-				id = "active"
-				value = "true"
-				checked = comp.isActive
-			}
-			button(type = ButtonType.submit) { +"Submit" }
+			button(type = ButtonType.submit, classes = "btn btn-primary") { +"Submit" }
 		}
 	}
 	
@@ -107,10 +136,10 @@ object Templates {
 	fun BODY.makeCompSubmit(comp: Competition, sub: Submission?): Unit = div {
 		h1 { +comp.title }
 		p { +comp.description }
-		textArea("8", "80") {
+		textArea("8", "80", TextAreaWrap.hard) {
 			id = "contents"
 			+(sub?.contents ?: comp.contents)
 		}
-		button(type = ButtonType.button) { +"Check Submission" }
+		button(type = ButtonType.button, classes = "btn btn-primary") { +"Check Submission" }
 	}
 }
