@@ -16,21 +16,10 @@ object Templates {
 		meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
 		title { +"$APP_NAME: $title"}
 		link(
-			"https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css",
+			"index.css",
 			LinkRel.stylesheet,
 			LinkType.textCss
 		)
-		style {
-			unsafe {
-				raw(
-"""
-body {
-	padding: 50px;
-}
-"""
-				)
-			}
-		}
 	}
 	
 	fun BODY.makeNav() = nav("navbar fixed-top navbar-dark bg-primary navbar-expand-md") {
