@@ -31,7 +31,8 @@ object Templates {
 	fun BODY.makeCompTable(
 		comps: List<Competition> = Competition.comps,
 		edit: Boolean = false
-	) = table("table") {
+	) = table("table caption-top") {
+		caption("fs-1 fw-bold") { +"Competitions" }
 		thead {
 			tr {
 				th { +"Title" }
@@ -47,6 +48,9 @@ object Templates {
 		tbody {
 			comps.forEach { comp ->
 				tr {
+					if (!comp.isActive) {
+						classes += "table-warning"
+					}
 					td { +comp.title }
 					td { +comp.description }
 					td { +comp.semester }
@@ -129,6 +133,6 @@ object Templates {
 			id = "contents"
 			+(sub?.contents ?: comp.contents)
 		}
-		button(type = ButtonType.button, classes = "btn btn-primary") { +"Check Submission" }
+		button(type = ButtonType.button, classes = "btn btn-primary d-block") { +"Check Submission" }
 	}
 }
