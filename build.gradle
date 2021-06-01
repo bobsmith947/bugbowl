@@ -59,9 +59,8 @@ compileKotlinJvm {
 }
 
 dependencies {
-	def tomcatVersion = '8.5.39'
+	def tomcatVersion = '9.0.46'
 	tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
-			"org.apache.tomcat.embed:tomcat-embed-logging-juli:8.5.2",
 			"org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}",
 			"org.apache.tomcat:tomcat-dbcp:${tomcatVersion}",
 			'org.postgresql:postgresql:42.2.20'

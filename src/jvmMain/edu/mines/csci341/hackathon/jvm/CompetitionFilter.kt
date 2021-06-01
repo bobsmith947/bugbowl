@@ -1,14 +1,17 @@
 package edu.mines.csci341.hackathon.jvm
 
-import javax.servlet.*
+import java.io.IOException
+import javax.servlet.ServletException
+import javax.servlet.FilterChain
 import javax.servlet.annotation.WebFilter
 import javax.servlet.http.*
 
 @WebFilter("/competition")
-class CompetitionFilter : Filter {
+class CompetitionFilter : HttpFilter() {
 	
-	override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
-		val session: HttpSession? = (req as HttpServletRequest).getSession(false)
+	@Throws(ServletException::class, IOException::class)
+	override fun doFilter(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain) {
+		val session: HttpSession? = req.getSession(false)
 		if (session != null) {
 			val userId = session.getAttribute("userId") as Int?
 			val userName = session.getAttribute("userName") as String?
@@ -17,14 +20,11 @@ class CompetitionFilter : Filter {
 				chain.doFilter(req, res)
 			} else {
 				// user is missing credentials
-				(res as HttpServletResponse).sendError(HttpServletResponse.SC_FORBIDDEN)
+				res.sendError(HttpServletResponse.SC_FORBIDDEN)
 			}
 		} else {
 			// user is not logged in
-			(res as HttpServletResponse).sendRedirect("index.html")
+			res.sendRedirect("index.html")
 		}
 	}
-	
-	override fun init(config: FilterConfig) {}
-	override fun destroy() {}
 }
