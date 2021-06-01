@@ -29,9 +29,9 @@ data class Competition(
 
 	companion object {
 		val comps = listOf(
-			Competition(1, "Test 1", "Test Description 1", "Test Contents 1", true, "2020-08-29".toLocalDate()),
-			Competition(2, "Test 2", "Test Description 2", "Test Contents 2", true, "2021-01-29".toLocalDate()),
-			Competition(3, "Test 3", "Test Description 3", "Test Contents 3", false, "2021-05-29".toLocalDate()),
+			Competition(1, "Test 1", "Test Description 1", "Test Contents 1", false, "2020-08-29".toLocalDate()),
+			Competition(2, "Test 2", "Test Description 2", "Test Contents 2", false, "2021-01-29".toLocalDate()),
+			Competition(3, "Test 3", "Test Description 3", "Test Contents 3", true, "2021-05-29".toLocalDate()),
 		)
 		init {
 			comps[0].apply {

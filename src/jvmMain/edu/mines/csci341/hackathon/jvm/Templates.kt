@@ -1,5 +1,8 @@
 package edu.mines.csci341.hackathon.jvm
 
+import kotlinx.datetime.periodUntil
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import kotlinx.html.*
 import edu.mines.csci341.hackathon.*
 
@@ -10,6 +13,7 @@ object Templates {
 			.formLabel(block: LABEL.() -> Unit) = label("form-label", block)
 	fun FlowOrInteractiveOrPhrasingContent
 			.formCheckLabel(block: LABEL.() -> Unit) = label("form-check-label", block)
+	fun OL.listGroupItem(block: LI.() -> Unit) = li("list-group-item", block)
 	
 	fun HTML.makeHead(title: String) = head {
 		meta(charset = "UTF-8")
@@ -55,13 +59,15 @@ object Templates {
 					td { +comp.description }
 					td { +comp.semester }
 					td {
-						if (edit) {
-							a("?id=${comp.id}") { +"Click to edit" }
-						} else {
-							if (comp.isActive) {
-								a("?id=${comp.id}") { +"Click to join" }
+						a("?id=${comp.id}") {
+							if (edit) {
+								+"Click to edit"
 							} else {
-								+"Closed"
+								if (comp.isActive) {
+									+"Click to join" 
+								} else {
+									+"Click to view"
+								}
 							}
 						}
 					}
@@ -129,10 +135,31 @@ object Templates {
 	fun BODY.makeCompSubmit(comp: Competition, sub: Submission?): Unit = div {
 		h1 { +comp.title }
 		p { +comp.description }
-		textArea("8", "80", TextAreaWrap.hard) {
-			id = "contents"
-			+(sub?.contents ?: comp.contents)
+		if (comp.isActive) {
+			textArea("8", "80", TextAreaWrap.hard) {
+				id = "contents"
+				+(sub?.contents ?: comp.contents)
+			}
+			button(type = ButtonType.button, classes = "btn btn-primary d-block") { +"Check Submission" }
+		} else {
+			h2 { +"Ranking" }
+			ol("list-group list-group-numbered") {
+				comp.participants.associateWith { user ->
+					user.submissions.filter { userSub ->
+						userSub.competition == comp && userSub.isCorrect
+					}.minOfOrNull { it.timestamp }
+				}.filterValues { it != null }.toList()
+					.sortedBy { (_, timestamp) -> timestamp }
+					.forEach { (user, timestamp) ->
+						listGroupItem {
+							+"${user.name}: "
+							+timestamp!!.periodUntil(
+								Clock.System.now(),
+								TimeZone.currentSystemDefault()
+							).toString()
+						}
+					}
+			}
 		}
-		button(type = ButtonType.button, classes = "btn btn-primary d-block") { +"Check Submission" }
 	}
 }
