@@ -10,15 +10,16 @@ import kotlinx.datetime.toLocalDate
 @Serializable
 data class Competition(
 	val id: Int,
-	val title: String,
-	val description: String,
-	val contents: String,
-	val isActive: Boolean = false,
+	var title: String,
+	var description: String,
+	var contents: String,
+	var isActive: Boolean = false,
 	val created: LocalDate = Clock.System.now()
 		.toLocalDateTime(TimeZone.currentSystemDefault()).date,
 ) {
 	var expectedResults: List<Pair<String, String>> = listOf()
-	var participants: List<User> = listOf()
+	var groups: Map<Int, List<User>> = mapOf()
+	var submissions: Map<Int, List<Submission>> = mapOf()
 	val semester: String
 		get() = when (created.monthNumber) {
 			in 1..4 -> "Spring ${created.year}"
@@ -26,6 +27,10 @@ data class Competition(
 			in 8..12 -> "Fall ${created.year}"
 			else -> throw IllegalStateException()
 		}
+	
+	fun checkSubmission(sub: Submission): Boolean {
+		return sub.results == expectedResults
+	}
 
 	companion object {
 		val comps = listOf(
@@ -36,15 +41,18 @@ data class Competition(
 		init {
 			comps[0].apply {
 				expectedResults = listOf("1" to "2")
-				participants = User.users
+				groups = mapOf(1 to User.users)
+				submissions = mapOf(1 to Submission.subs)
 			}
 			comps[1].apply {
 				expectedResults = listOf("2" to "3")
-				participants = User.users
+				groups = mapOf(1 to User.users)
+				submissions = mapOf(1 to Submission.subs)
 			}
 			comps[2].apply {
 				expectedResults = listOf("3" to "4")
-				participants = User.users
+				groups = mapOf(1 to User.users)
+				submissions = mapOf(1 to Submission.subs)
 			}
 		}
 	}

@@ -8,7 +8,6 @@ data class User(
 	val name: String,
 	val isAdmin: Boolean = false,
 ) {
-	var submissions: List<Submission> = listOf()
 
 	companion object {
 		val users = listOf(
@@ -16,9 +15,5 @@ data class User(
 			User(2, "John Smith"),
 			User(3, "Susan Smith", true),
 		)
-		init {
-			users[0].submissions = Submission.subs
-			users[1].submissions = Submission.subs
-		}
 	}
 }

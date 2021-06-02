@@ -128,9 +128,9 @@ object Templates {
 		}
 	}
 	
-	fun BODY.makeCompSubmit(compId: Int, userId: Int): Unit = makeCompSubmit(
+	fun BODY.makeCompSubmit(compId: Int, groupNum: Int): Unit = makeCompSubmit(
 		Competition.comps[compId - 1],
-		User.users[userId - 1].submissions.filter { it.competition.id == compId }.lastOrNull()
+		Competition.comps[compId - 1].submissions[groupNum]?.lastOrNull()
 	)
 	fun BODY.makeCompSubmit(comp: Competition, sub: Submission?): Unit = div {
 		h1 { +comp.title }
@@ -144,15 +144,14 @@ object Templates {
 		} else {
 			h2 { +"Ranking" }
 			ol("list-group list-group-numbered") {
-				comp.participants.associateWith { user ->
-					user.submissions.filter { userSub ->
-						userSub.competition == comp && userSub.isCorrect
-					}.minOfOrNull { it.timestamp }
+				comp.submissions.mapValues { (_, subs) ->
+					subs.filter { comp.checkSubmission(it) }
+						.minOfOrNull { it.timestamp }
 				}.filterValues { it != null }.toList()
 					.sortedBy { (_, timestamp) -> timestamp }
-					.forEach { (user, timestamp) ->
+					.forEach { (groupNum, timestamp) ->
 						listGroupItem {
-							+"${user.name}: "
+							+"Group $groupNum: "
 							+timestamp!!.periodUntil(
 								Clock.System.now(),
 								TimeZone.currentSystemDefault()
