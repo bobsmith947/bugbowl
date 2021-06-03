@@ -18,8 +18,15 @@ data class Competition(
 		.toLocalDateTime(TimeZone.currentSystemDefault()).date,
 ) {
 	var expectedResults: List<Pair<String, String>> = listOf()
-	var groups: Map<Int, List<User>> = mapOf()
-	var submissions: Map<Int, List<Submission>> = mapOf()
+	var groups: MutableMap<String, MutableList<User>> = mutableMapOf()
+	var submissions: MutableMap<String, MutableList<Submission>> = mutableMapOf()
+	
+	val nextGroupNum: Int
+		get() = groups.size + 1
+	
+	val participants: Set<User>
+		get() = groups.flatMap { it.value }.toSet()
+	
 	val semester: String
 		get() = when (created.monthNumber) {
 			in 1..4 -> "Spring ${created.year}"
@@ -31,6 +38,15 @@ data class Competition(
 	fun checkSubmission(sub: Submission): Boolean {
 		return sub.results == expectedResults
 	}
+	
+	fun getGroupName(userId: Int): String? {
+		groups.forEach { (name, users) ->
+			if (users.any { it.id == userId }) {
+				return@getGroupName name
+			}
+		}
+		return null
+	}
 
 	companion object {
 		val comps = listOf(
@@ -41,18 +57,18 @@ data class Competition(
 		init {
 			comps[0].apply {
 				expectedResults = listOf("1" to "2")
-				groups = mapOf(1 to User.users)
-				submissions = mapOf(1 to Submission.subs)
+				groups = mutableMapOf("1" to User.users.toMutableList())
+				submissions = mutableMapOf("1" to Submission.subs.toMutableList())
 			}
 			comps[1].apply {
 				expectedResults = listOf("2" to "3")
-				groups = mapOf(1 to User.users)
-				submissions = mapOf(1 to Submission.subs)
+				groups = mutableMapOf("1" to User.users.toMutableList())
+				submissions = mutableMapOf("1" to Submission.subs.toMutableList())
 			}
 			comps[2].apply {
 				expectedResults = listOf("3" to "4")
-				groups = mapOf(1 to User.users)
-				submissions = mapOf(1 to Submission.subs)
+				groups = mutableMapOf("1" to User.users.toMutableList())
+				submissions = mutableMapOf("1" to Submission.subs.toMutableList())
 			}
 		}
 	}

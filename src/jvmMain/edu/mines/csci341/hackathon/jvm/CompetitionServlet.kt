@@ -10,6 +10,9 @@ import edu.mines.csci341.hackathon.jvm.Templates.makeHead
 import edu.mines.csci341.hackathon.jvm.Templates.makeNav
 import edu.mines.csci341.hackathon.jvm.Templates.makeCompTable
 import edu.mines.csci341.hackathon.jvm.Templates.makeCompSubmit
+import edu.mines.csci341.hackathon.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @WebServlet("/competition")
 class CompetitionServlet : HttpServlet() {
@@ -32,6 +35,44 @@ class CompetitionServlet : HttpServlet() {
 					}
 				}
 			}
+		}
+	}
+	
+	@Throws(ServletException::class, IOException::class)
+	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
+		val action: String? = req.getParameter("action")
+		val compId: String? = req.getParameter("id")
+		var groupName: String? = req.getParameter("group")
+		val userId = req.getSession(false).getAttribute("userId") as Int
+		val userName = req.getSession(false).getAttribute("userName") as String
+		when (action) {
+			"joingroup" -> {
+				res.setContentType("application/json")
+				res.getWriter().use { out ->
+					if (compId != null) {
+						val comp = Competition.comps[compId.toInt() - 1]
+						if (groupName != null) {
+							comp.groups[groupName]!!.add(User(userId, userName))
+							out.println(Json.encodeToString(comp.groups[groupName]))
+						} else {
+							out.println(Json.encodeToString(comp.groups.keys))
+						}
+					} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
+				}
+			}
+			"creategroup" -> {
+				if (compId != null) {
+					val comp = Competition.comps[compId.toInt() - 1]
+					if (groupName != null) {
+						if (groupName.isBlank()) {
+							groupName = "Group ${comp.nextGroupNum}"
+						}
+						comp.groups[groupName] = mutableListOf(User(userId, userName))
+						comp.submissions[groupName] = mutableListOf()
+					} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
+				} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
+			}
+			else -> res.sendError(HttpServletResponse.SC_BAD_REQUEST)
 		}
 	}
 

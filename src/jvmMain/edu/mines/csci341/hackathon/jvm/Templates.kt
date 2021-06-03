@@ -24,6 +24,7 @@ object Templates {
 			LinkRel.stylesheet,
 			LinkType.textCss
 		)
+		script(ScriptType.textJavaScript, "index.js") { defer = true }
 	}
 	
 	fun BODY.makeNav() = nav("navbar fixed-top navbar-dark bg-primary navbar-expand-md") {
@@ -128,19 +129,38 @@ object Templates {
 		}
 	}
 	
-	fun BODY.makeCompSubmit(compId: Int, groupNum: Int): Unit = makeCompSubmit(
-		Competition.comps[compId - 1],
-		Competition.comps[compId - 1].submissions[groupNum]?.lastOrNull()
-	)
-	fun BODY.makeCompSubmit(comp: Competition, sub: Submission?): Unit = div {
+	fun BODY.makeCompSubmit(compId: Int, userId: Int): Unit {
+		val comp = Competition.comps[compId - 1]
+		val group = comp.getGroupName(userId)
+		return makeCompSubmit(comp, group)
+	}
+	fun BODY.makeCompSubmit(comp: Competition, group: String?): Unit = div {
 		h1 { +comp.title }
 		p { +comp.description }
 		if (comp.isActive) {
-			textArea("8", "80", TextAreaWrap.hard) {
+			textArea("8", "80", TextAreaWrap.hard, "form-control") {
 				id = "contents"
-				+(sub?.contents ?: comp.contents)
+				+(comp.submissions[group]?.lastOrNull()?.contents ?: comp.contents)
 			}
-			button(type = ButtonType.button, classes = "btn btn-primary d-block") { +"Check Submission" }
+			if (group != null) {
+				button(type = ButtonType.button, classes = "btn btn-primary d-block my-3") { +"Check Submission" }
+			} else {
+				h3("text-warning") { +"You need to be in a group in order to submit!" }
+				button(type = ButtonType.button, classes = "btn btn-primary") {
+					id = "creategroup"
+					+"Create a group"
+				}
+				select("form-select mt-3") {
+					id = "joingroup"
+					size = "10"
+					option {
+						selected = true
+						value = ""
+						+"Join a group (click to refresh)"
+					}
+					optGroup("Available Groups")
+				}
+			}
 		} else {
 			h2 { +"Ranking" }
 			ol("list-group list-group-numbered") {
