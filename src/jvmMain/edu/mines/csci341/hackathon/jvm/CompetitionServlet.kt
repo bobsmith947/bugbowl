@@ -21,7 +21,7 @@ class CompetitionServlet : HttpServlet() {
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: String? = req.getParameter("id")
 		val user = req.getSession(false).getAttribute("user") as User
-		res.setContentType("text/html")
+		res.setContentType("text/html;charset=UTF-8")
 		res.getWriter().use { out ->
 			out.println("<!DOCTYPE html>")
 			out.appendHTML().html {
@@ -46,7 +46,7 @@ class CompetitionServlet : HttpServlet() {
 		val user = req.getSession(false).getAttribute("user") as User
 		when (action) {
 			"joingroup" -> {
-				res.setContentType("application/json")
+				res.setContentType("application/json;charset=UTF-8")
 				res.getWriter().use { out ->
 					if (compId != null) {
 						val comp = Competition.comps[compId.toInt() - 1]

@@ -17,7 +17,7 @@ class AdminServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: String? = req.getParameter("id")
-		res.setContentType("text/html")
+		res.setContentType("text/html;charset=UTF-8")
 		res.getWriter().use { out ->
 			out.println("<!DOCTYPE html>")
 			out.appendHTML().html {
@@ -36,7 +36,7 @@ class AdminServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
-		res.setContentType("text/plain")
+		res.setContentType("text/plain;charset=UTF-8")
 		res.getWriter().use { out ->
 			req.getParameterMap().forEach { (k, v) ->
 				out.print("$k: ")
