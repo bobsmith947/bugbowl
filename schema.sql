@@ -13,6 +13,6 @@ CREATE TABLE IF NOT EXISTS hackathon_competitions (
 CREATE TABLE IF NOT EXISTS hackathon_submissions (
 	id serial PRIMARY KEY,
 	user_id integer NOT NULL REFERENCES hackathon_users (id),
-	comp_id integer NOT NULL REFERENCES hackathon_competitions (id),
+	comp_id integer REFERENCES hackathon_competitions (id),
 	data jsonb NOT NULL
 );

@@ -20,7 +20,7 @@ class CompetitionServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: String? = req.getParameter("id")
-		val userId = req.getSession(false).getAttribute("userId") as Int
+		val user = req.getSession(false).getAttribute("user") as User
 		res.setContentType("text/html")
 		res.getWriter().use { out ->
 			out.println("<!DOCTYPE html>")
@@ -31,7 +31,7 @@ class CompetitionServlet : HttpServlet() {
 					if (compId == null) {
 						makeCompTable()
 					} else {
-						makeCompSubmit(compId.toInt(), userId)
+						makeCompSubmit(compId.toInt(), user.id)
 					}
 				}
 			}
@@ -43,8 +43,7 @@ class CompetitionServlet : HttpServlet() {
 		val action: String? = req.getParameter("action")
 		val compId: String? = req.getParameter("id")
 		var groupName: String? = req.getParameter("group")
-		val userId = req.getSession(false).getAttribute("userId") as Int
-		val userName = req.getSession(false).getAttribute("userName") as String
+		val user = req.getSession(false).getAttribute("user") as User
 		when (action) {
 			"joingroup" -> {
 				res.setContentType("application/json")
@@ -52,7 +51,7 @@ class CompetitionServlet : HttpServlet() {
 					if (compId != null) {
 						val comp = Competition.comps[compId.toInt() - 1]
 						if (groupName != null) {
-							comp.groups[groupName]!!.add(User(userId, userName))
+							comp.groups[groupName]!!.add(user)
 							out.println(Json.encodeToString(comp.groups[groupName]))
 						} else {
 							out.println(Json.encodeToString(comp.groups.keys))
@@ -67,7 +66,7 @@ class CompetitionServlet : HttpServlet() {
 						if (groupName.isBlank()) {
 							groupName = "Group ${comp.nextGroupNum}"
 						}
-						comp.groups[groupName] = mutableListOf(User(userId, userName))
+						comp.groups[groupName] = mutableListOf(user)
 						comp.submissions[groupName] = mutableListOf()
 					} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
 				} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)

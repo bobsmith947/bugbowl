@@ -11,14 +11,17 @@ class LoginServlet : HttpServlet() {
 		req.getSession(false)?.invalidate()
 		val session: HttpSession = req.getSession()
 		// TODO use multipass login
-		session.setAttribute("userId", 1)
-		session.setAttribute("userName", "testuser")
-		// comment out to test as a regular user
-		session.setAttribute("admin", true)
-		if (session.getAttribute("admin") != null) {
-			res.sendRedirect("admin")
+		val userName = "admin"
+		val user = Database.getUser(userName)
+		if (user == null) {
+			res.sendError(HttpServletResponse.SC_FORBIDDEN)
 		} else {
-			res.sendRedirect("competition")
+			session.setAttribute("user", user)
+			if (user.isAdmin) {
+				res.sendRedirect("admin")
+			} else {
+				res.sendRedirect("competition")
+			}
 		}
 	}
 	

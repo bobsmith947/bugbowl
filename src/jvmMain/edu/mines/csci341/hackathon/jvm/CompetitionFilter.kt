@@ -5,6 +5,7 @@ import javax.servlet.ServletException
 import javax.servlet.FilterChain
 import javax.servlet.annotation.WebFilter
 import javax.servlet.http.*
+import edu.mines.csci341.hackathon.User
 
 @WebFilter("/competition")
 class CompetitionFilter : HttpFilter() {
@@ -13,9 +14,8 @@ class CompetitionFilter : HttpFilter() {
 	override fun doFilter(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain) {
 		val session: HttpSession? = req.getSession(false)
 		if (session != null) {
-			val userId = session.getAttribute("userId") as Int?
-			val userName = session.getAttribute("userName") as String?
-			if (userId != null && userName != null) {
+			val user = session.getAttribute("user") as User?
+			if (user != null) {
 				// user is logged in
 				chain.doFilter(req, res)
 			} else {
