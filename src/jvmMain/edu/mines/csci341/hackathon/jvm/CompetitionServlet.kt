@@ -31,7 +31,7 @@ class CompetitionServlet : HttpServlet() {
 					if (compId == null) {
 						makeCompTable()
 					} else {
-						makeCompSubmit(compId.toInt(), user.id)
+						makeCompSubmit(compId.toInt(), user)
 					}
 				}
 			}
@@ -60,15 +60,20 @@ class CompetitionServlet : HttpServlet() {
 				}
 			}
 			"creategroup" -> {
+				if (compId != null && groupName != null) {
+					val comp = Competition.comps[compId.toInt() - 1]
+					// TODO check if group name already exists
+					if (groupName.isBlank()) {
+						groupName = "Group ${comp.nextGroupNum}"
+					}
+					comp.groups[groupName] = mutableListOf(user)
+					comp.submissions[groupName] = mutableListOf()
+				} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
+			}
+			"leavegroup" -> {
 				if (compId != null) {
 					val comp = Competition.comps[compId.toInt() - 1]
-					if (groupName != null) {
-						if (groupName.isBlank()) {
-							groupName = "Group ${comp.nextGroupNum}"
-						}
-						comp.groups[groupName] = mutableListOf(user)
-						comp.submissions[groupName] = mutableListOf()
-					} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
+					comp.groups[comp.getGroupName(user)]!!.remove(user)
 				} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
 			}
 			else -> res.sendError(HttpServletResponse.SC_BAD_REQUEST)

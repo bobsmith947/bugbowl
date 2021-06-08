@@ -39,9 +39,9 @@ data class Competition(
 		return sub.results == expectedResults
 	}
 	
-	fun getGroupName(userId: Int): String? {
+	fun getGroupName(user: User): String? {
 		groups.forEach { (name, users) ->
-			if (users.any { it.id == userId }) {
+			if (users.contains(user)) {
 				return@getGroupName name
 			}
 		}

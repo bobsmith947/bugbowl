@@ -29,6 +29,19 @@ fun main() {
 		}
 	})
 	
+	document.getElementById("leavegroup")?.addEventListener("click", {
+		val xhr = XMLHttpRequest()
+		xhr.onreadystatechange = fun(ev: Event) {
+			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 200) {
+				window.location.reload()
+			}
+		}
+		xhr.open("POST", window.location.pathname)
+		val params = URLSearchParams(window.location.search)
+		params.append("action", "leavegroup")
+		xhr.send(params)
+	})
+	
 	document.getElementById("joingroup")?.addEventListener("click", {
 		val xhr = XMLHttpRequest()
 		xhr.onreadystatechange = fun(ev: Event) {

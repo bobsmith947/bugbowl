@@ -14,6 +14,7 @@ object Templates {
 	fun FlowOrInteractiveOrPhrasingContent
 			.formCheckLabel(block: LABEL.() -> Unit) = label("form-check-label", block)
 	fun OL.listGroupItem(block: LI.() -> Unit) = li("list-group-item", block)
+	fun UL.listGroupItem(block: LI.() -> Unit) = li("list-group-item", block)
 	
 	fun HTML.makeHead(title: String) = head {
 		meta(charset = "UTF-8")
@@ -129,9 +130,9 @@ object Templates {
 		}
 	}
 	
-	fun BODY.makeCompSubmit(compId: Int, userId: Int): Unit {
+	fun BODY.makeCompSubmit(compId: Int, user: User): Unit {
 		val comp = Competition.comps[compId - 1]
-		val group = comp.getGroupName(userId)
+		val group = comp.getGroupName(user)
 		return makeCompSubmit(comp, group)
 	}
 	fun BODY.makeCompSubmit(comp: Competition, group: String?): Unit = div {
@@ -144,6 +145,16 @@ object Templates {
 			}
 			if (group != null) {
 				button(type = ButtonType.button, classes = "btn btn-primary d-block my-3") { +"Check Submission" }
+				h2("d-inline-block") { +"$group Members" }
+				button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
+					id = "leavegroup"
+					+"Leave $group"
+				}
+				ul("list-group") {
+					comp.groups[group]!!.forEach {
+						listGroupItem { +it.name }
+					}
+				}
 			} else {
 				h3("text-warning") { +"You need to be in a group in order to submit!" }
 				button(type = ButtonType.button, classes = "btn btn-primary") {
@@ -169,9 +180,9 @@ object Templates {
 						.minOfOrNull { it.timestamp }
 				}.filterValues { it != null }.toList()
 					.sortedBy { (_, timestamp) -> timestamp }
-					.forEach { (groupNum, timestamp) ->
+					.forEach { (groupName, timestamp) ->
 						listGroupItem {
-							+"Group $groupNum: "
+							+"$groupName: "
 							+timestamp!!.periodUntil(
 								Clock.System.now(),
 								TimeZone.currentSystemDefault()
