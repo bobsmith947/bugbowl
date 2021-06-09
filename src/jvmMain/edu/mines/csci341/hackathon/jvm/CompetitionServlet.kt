@@ -62,12 +62,15 @@ class CompetitionServlet : HttpServlet() {
 			"creategroup" -> {
 				if (compId != null && groupName != null) {
 					val comp = Competition.comps[compId.toInt() - 1]
-					// TODO check if group name already exists
 					if (groupName.isBlank()) {
 						groupName = "Group ${comp.nextGroupNum}"
 					}
-					comp.groups[groupName] = mutableListOf(user)
-					comp.submissions[groupName] = mutableListOf()
+					if (comp.groups.containsKey(groupName)) {
+						res.sendError(HttpServletResponse.SC_FORBIDDEN)
+					} else {
+						comp.groups[groupName] = mutableListOf(user)
+						comp.submissions[groupName] = mutableListOf()
+					}
 				} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
 			}
 			"leavegroup" -> {

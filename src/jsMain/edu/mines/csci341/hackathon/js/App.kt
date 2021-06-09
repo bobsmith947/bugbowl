@@ -17,8 +17,12 @@ fun main() {
 		if (group != null) {
 			val xhr = XMLHttpRequest()
 			xhr.onreadystatechange = fun(ev: Event) {
-				if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 200) {
-					window.location.reload()
+				if (xhr.readyState == XMLHttpRequest.DONE) {
+					when (xhr.status.toInt()) {
+						200 -> window.location.reload()
+						403 -> window.alert("Group name is already taken.")
+						else -> return
+					}
 				}
 			}
 			xhr.open("POST", window.location.pathname)
