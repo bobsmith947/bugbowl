@@ -13,8 +13,8 @@ object Database {
 	private var _conn: Connection? = null
 	private val conn get() = _conn!!
 	
-	val users: MutableList<User> = mutableListOf()
-	val comps: MutableList<Competition> = mutableListOf()
+	val users: MutableMap<Int, User> = mutableMapOf()
+	val comps: MutableMap<Int, Competition> = mutableMapOf()
 	
 	init {
 		val ctx = InitialContext()
@@ -25,14 +25,16 @@ object Database {
 			_conn = db.getConnection()
 			stmt = conn.createStatement()
 			
-			var rs: ResultSet = stmt.executeQuery("SELECT data FROM hackathon_users ORDER BY id")
+			var rs: ResultSet = stmt.executeQuery("SELECT data FROM hackathon_users")
 			while (rs.next()) {
-				users.add(Json.decodeFromString<User>(rs.getString(1)))
+				val user = Json.decodeFromString<User>(rs.getString(1))
+				users[user.id] = user
 			}
 			
-			rs = stmt.executeQuery("SELECT data FROM hackathon_competitions ORDER BY id")
+			rs = stmt.executeQuery("SELECT data FROM hackathon_competitions")
 			while (rs.next()) {
-				comps.add(Json.decodeFromString<Competition>(rs.getString(1)))
+				val comp = Json.decodeFromString<Competition>(rs.getString(1))
+				comps[comp.id] = comp
 			}
 		} catch (e: SQLException) {
 			System.err.println(e.message)
@@ -41,6 +43,9 @@ object Database {
 		}
 	}
 	
+	// database index may allow for faster lookups
+	// rather than searching through user ID map in-place
+	// or allocating another map with user names as keys
 	fun getUser(userName: String): User? {
 		var ps: PreparedStatement? = null
 		val user: User? = try {
