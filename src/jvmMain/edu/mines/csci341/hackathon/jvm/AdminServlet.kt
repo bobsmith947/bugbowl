@@ -10,6 +10,10 @@ import edu.mines.csci341.hackathon.jvm.Templates.makeHead
 import edu.mines.csci341.hackathon.jvm.Templates.makeNav
 import edu.mines.csci341.hackathon.jvm.Templates.makeCompTable
 import edu.mines.csci341.hackathon.jvm.Templates.makeCompEdit
+import edu.mines.csci341.hackathon.Competition
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 @WebServlet("/admin")
 class AdminServlet : HttpServlet() {
@@ -25,6 +29,7 @@ class AdminServlet : HttpServlet() {
 				body {
 					makeNav()
 					if (compId == null) {
+						a("?id=0", classes = "btn btn-primary mt-3") { +"Add a Competition" }
 						makeCompTable(edit = true)
 					} else {
 						makeCompEdit(compId.toInt())
@@ -36,11 +41,14 @@ class AdminServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
-		res.setContentType("text/plain;charset=UTF-8")
+		res.setContentType("application/json;charset=UTF-8")
 		res.getWriter().use { out ->
-			req.getParameterMap().forEach { (k, v) ->
-				out.print("$k: ")
-				out.println(v[0])
+			val params = req.getParameterMap()
+			val json = Json.encodeToString(params.mapValues { (_, v) -> v[0] })
+			out.println(json)
+			if (params["id"]?.get(0) == "0") {
+				val comp = Json { isLenient = true }.decodeFromString<Competition>(json)
+				Database.addCompetition(comp)
 			}
 		}
 	}

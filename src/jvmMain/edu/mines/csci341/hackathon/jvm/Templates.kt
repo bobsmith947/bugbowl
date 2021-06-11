@@ -35,7 +35,7 @@ object Templates {
 	}
 	
 	fun BODY.makeCompTable(
-		comps: List<Competition> = Competition.comps,
+		comps: List<Competition> = Database.comps.values.toList(),
 		edit: Boolean = false
 	) = table("table caption-top") {
 		caption("fs-1 fw-bold") { +"Competitions" }
@@ -78,11 +78,14 @@ object Templates {
 		}
 	}
 	
-	fun BODY.makeCompEdit(compId: Int): Unit = makeCompEdit(Competition.comps[compId - 1])
-	fun BODY.makeCompEdit(comp: Competition): Unit = div {
-		h1 { +"Edit Competition ${comp.id}" }
+	fun BODY.makeCompEdit(compId: Int): Unit = makeCompEdit(Database.comps[compId])
+	fun BODY.makeCompEdit(comp: Competition?): Unit = div {
+		if (comp != null) {
+			h1 { +"Edit Competition ${comp.id}" }
+		} else {
+			h1 { +"New Competition" }
+		}
 		form(method = FormMethod.post) {
-			hiddenInput(name = "id") { value = comp.id.toString() }
 			div {
 				formLabel {
 					htmlFor = "title"
@@ -90,7 +93,7 @@ object Templates {
 				}
 				textInput(name = "title", classes = "form-control") {
 					id = "title"
-					value = comp.title
+					value = comp?.title ?: ""
 				}
 			}
 			div {
@@ -101,7 +104,7 @@ object Templates {
 				textArea("4", "40", TextAreaWrap.soft, "form-control") {
 					id = "description"
 					name = "description"
-					+comp.description
+					+(comp?.description ?: "")
 				}
 			}
 			div {
@@ -112,14 +115,14 @@ object Templates {
 				textArea("8", "80", TextAreaWrap.hard, "form-control") {
 					id = "contents"
 					name = "contents"
-					+comp.contents
+					+(comp?.contents ?: "")
 				}
 			}
 			div("form-check") {
 				checkBoxInput(name = "isActive", classes = "form-check-input") {
 					id = "active"
 					value = "true"
-					checked = comp.isActive
+					checked = comp?.isActive ?: false
 				}
 				formCheckLabel {
 					htmlFor = "active"

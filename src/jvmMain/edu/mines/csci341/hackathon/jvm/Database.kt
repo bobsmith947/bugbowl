@@ -70,7 +70,7 @@ object Database {
 		var ps: PreparedStatement? = null
 		try {
 			ps = conn.prepareStatement(
-				"INSERT INTO hackathon_competitions (data) VALUES (?)",
+				"INSERT INTO hackathon_competitions (data) VALUES (?::jsonb)",
 				Statement.RETURN_GENERATED_KEYS
 			)
 			ps.setString(1, Json.encodeToString(comp))
