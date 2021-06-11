@@ -45,10 +45,10 @@ class AdminServlet : HttpServlet() {
 		res.getWriter().use { out ->
 			val params = req.getParameterMap()
 			val json = Json.encodeToString(params.mapValues { (_, v) -> v[0] })
-			out.println(json)
+			val comp = Json { isLenient = true }.decodeFromString<Competition>(json)
 			if (params["id"]?.get(0) == "0") {
-				val comp = Json { isLenient = true }.decodeFromString<Competition>(json)
-				Database.addCompetition(comp)
+				val newComp = Database.addCompetition(comp)
+				out.println(Json.encodeToString(newComp))
 			}
 		}
 	}

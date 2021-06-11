@@ -55,7 +55,7 @@ object Database {
 			if (rs.next()) {
 				Json.decodeFromString<User>(rs.getString(1))
 			} else {
-				null
+				throw SQLException("Username not found in database.")
 			}
 		} catch (e: SQLException) {
 			System.err.println(e.message)
@@ -66,9 +66,9 @@ object Database {
 		return user
 	}
 	
-	fun addCompetition(comp: Competition) {
+	fun addCompetition(comp: Competition): Competition {
 		var ps: PreparedStatement? = null
-		try {
+		val newComp: Competition? = try {
 			ps = conn.prepareStatement(
 				"INSERT INTO hackathon_competitions (data) VALUES (?::jsonb)",
 				Statement.RETURN_GENERATED_KEYS
@@ -87,16 +87,22 @@ object Database {
 											WHERE id = ?""".trimIndent())
 				ps.setInt(1, id)
 				ps.executeUpdate()
-				// add the finalized competition to the map of competitions
-				comps[id] = comp.copy(id)
+				// make a copy of the competition with the correct ID
+				comp.copy(id)
 			} else {
 				throw SQLException("Could not get the generated ID for this competition.")
 			}
 		} catch (e: SQLException) {
 			System.err.println(e.message)
+			null
 		} finally {
 			ps?.close()
 		}
+		if (newComp != null) {
+			comps[newComp.id] = newComp
+			return newComp
+		}
+		return comp
 	}
 	
 	fun updateCompetition(comp: Competition) {
