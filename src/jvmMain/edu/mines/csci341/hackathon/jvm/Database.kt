@@ -65,4 +65,37 @@ object Database {
 		}
 		return user
 	}
+	
+	fun addCompetition(comp: Competition) {
+		var ps: PreparedStatement? = null
+		try {
+			ps = conn.prepareStatement(
+				"INSERT INTO hackathon_competitions (data) VALUES (?)",
+				Statement.RETURN_GENERATED_KEYS
+			)
+			ps.setString(1, Json.encodeToString(comp))
+			ps.executeUpdate()
+			val rs: ResultSet = ps.generatedKeys
+			if (rs.next()) {
+				// get the generated ID
+				val id = rs.getInt(1)
+				ps.close()
+				// update the JSON to reflect the inserted ID
+				ps = conn.prepareStatement("""
+											UPDATE hackathon_competitions
+											SET data = jsonb_set(data, '{id}', id::text::jsonb)
+											WHERE id = ?""".trimIndent())
+				ps.setInt(1, id)
+				ps.executeUpdate()
+				// add the finalized competition to the map of competitions
+				comps[id] = comp.copy(id)
+			} else {
+				throw SQLException("Could not get the generated ID for this competition.")
+			}
+		} catch (e: SQLException) {
+			System.err.println(e.message)
+		} finally {
+			ps?.close()
+		}
+	}
 }
