@@ -98,4 +98,33 @@ object Database {
 			ps?.close()
 		}
 	}
+	
+	fun updateCompetition(comp: Competition) {
+		var ps: PreparedStatement? = null
+		try {
+			ps = conn.prepareStatement("UPDATE hackathon_competitions SET data = ?::jsonb WHERE id = ?")
+			ps.setString(1, Json.encodeToString(comp))
+			ps.setInt(2, comp.id)
+			ps.executeUpdate()
+			comps[comp.id] = comp
+		} catch (e: SQLException) {
+			System.err.println(e.message)
+		} finally {
+			ps?.close()
+		}
+	}
+	
+	fun removeCompetition(comp: Competition) {
+		var ps: PreparedStatement? = null
+		try {
+			ps = conn.prepareStatement("DELETE FROM hackathon_competitions WHERE id = ?")
+			ps.setInt(1, comp.id)
+			ps.executeUpdate()
+			comps.remove(comp.id)
+		} catch (e: SQLException) {
+			System.err.println(e.message)
+		} finally {
+			ps?.close()
+		}
+	}
 }
