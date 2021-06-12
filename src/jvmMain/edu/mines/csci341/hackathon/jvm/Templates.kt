@@ -81,11 +81,16 @@ object Templates {
 	fun BODY.makeCompEdit(compId: Int): Unit = makeCompEdit(Database.comps[compId])
 	fun BODY.makeCompEdit(comp: Competition?): Unit = div {
 		if (comp != null) {
-			h1 { +"Edit Competition ${comp.id}" }
+			h1("d-inline-block") { +"Edit Competition ${comp.id}" }
+			button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
+				id = "deletecomp"
+				+"Delete"
+			}
 		} else {
 			h1 { +"New Competition" }
 		}
 		form(method = FormMethod.post) {
+			id = "editcomp"
 			div {
 				formLabel {
 					htmlFor = "title"

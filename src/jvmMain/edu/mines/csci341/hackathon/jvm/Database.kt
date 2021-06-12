@@ -120,13 +120,13 @@ object Database {
 		}
 	}
 	
-	fun removeCompetition(comp: Competition) {
+	fun removeCompetition(compId: Int) {
 		var ps: PreparedStatement? = null
 		try {
 			ps = conn.prepareStatement("DELETE FROM hackathon_competitions WHERE id = ?")
-			ps.setInt(1, comp.id)
+			ps.setInt(1, compId)
 			ps.executeUpdate()
-			comps.remove(comp.id)
+			comps.remove(compId)
 		} catch (e: SQLException) {
 			System.err.println(e.message)
 		} finally {

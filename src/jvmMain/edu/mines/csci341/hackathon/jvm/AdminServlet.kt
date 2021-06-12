@@ -49,8 +49,20 @@ class AdminServlet : HttpServlet() {
 			if (params["id"]?.get(0) == "0") {
 				val newComp = Database.addCompetition(comp)
 				out.println(Json.encodeToString(newComp))
+			} else {
+				Database.updateCompetition(comp)
+				out.println(Json.encodeToString(comp))
 			}
 		}
+	}
+	
+	@Throws(ServletException::class, IOException::class)
+	override fun doDelete(req: HttpServletRequest, res: HttpServletResponse) {
+		val compId: String? = req.getParameter("id")
+		if (compId != null) {
+			Database.removeCompetition(compId.toInt())
+		}
+		res.setStatus(HttpServletResponse.SC_NO_CONTENT)
 	}
 
 	companion object {
