@@ -7,13 +7,4 @@ data class User(
 	val id: Int,
 	val name: String,
 	val isAdmin: Boolean = false,
-) {
-
-	companion object {
-		val users = listOf(
-			User(1, "Bob Smith"),
-			User(2, "John Smith"),
-			User(3, "Susan Smith", true),
-		)
-	}
-}
+)

@@ -140,7 +140,7 @@ object Templates {
 	}
 	
 	fun BODY.makeCompSubmit(compId: Int, user: User): Unit {
-		val comp = Competition.comps[compId - 1]
+		val comp = Database.comps[compId]!!
 		val group = comp.getGroupName(user)
 		return makeCompSubmit(comp, group)
 	}

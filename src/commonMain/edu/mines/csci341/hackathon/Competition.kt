@@ -10,10 +10,10 @@ import kotlinx.datetime.toLocalDate
 @Serializable
 data class Competition(
 	val id: Int,
-	var title: String,
-	var description: String,
-	var contents: String,
-	var isActive: Boolean = false,
+	val title: String,
+	val description: String,
+	val contents: String,
+	val isActive: Boolean = false,
 	val created: LocalDate = Clock.System.now()
 		.toLocalDateTime(TimeZone.currentSystemDefault()).date,
 ) {
@@ -46,30 +46,5 @@ data class Competition(
 			}
 		}
 		return null
-	}
-
-	companion object {
-		val comps = listOf(
-			Competition(1, "Test 1", "Test Description 1", "Test Contents 1", false, "2020-08-29".toLocalDate()),
-			Competition(2, "Test 2", "Test Description 2", "Test Contents 2", false, "2021-01-29".toLocalDate()),
-			Competition(3, "Test 3", "Test Description 3", "Test Contents 3", true, "2021-05-29".toLocalDate()),
-		)
-		init {
-			comps[0].apply {
-				expectedResults = listOf("1" to "2")
-				groups = mutableMapOf("1" to User.users.toMutableList())
-				submissions = mutableMapOf("1" to Submission.subs.toMutableList())
-			}
-			comps[1].apply {
-				expectedResults = listOf("2" to "3")
-				groups = mutableMapOf("1" to User.users.toMutableList())
-				submissions = mutableMapOf("1" to Submission.subs.toMutableList())
-			}
-			comps[2].apply {
-				expectedResults = listOf("3" to "4")
-				groups = mutableMapOf("1" to User.users.toMutableList())
-				submissions = mutableMapOf("1" to Submission.subs.toMutableList())
-			}
-		}
 	}
 }

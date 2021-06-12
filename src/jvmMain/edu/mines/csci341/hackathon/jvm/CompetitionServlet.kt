@@ -44,12 +44,12 @@ class CompetitionServlet : HttpServlet() {
 		val compId: String? = req.getParameter("id")
 		var groupName: String? = req.getParameter("group")
 		val user = req.getSession(false).getAttribute("user") as User
+		val comp = Database.comps[compId?.toInt()]
 		when (action) {
 			"joingroup" -> {
 				res.setContentType("application/json;charset=UTF-8")
 				res.getWriter().use { out ->
-					if (compId != null) {
-						val comp = Competition.comps[compId.toInt() - 1]
+					if (comp != null) {
 						if (groupName != null) {
 							comp.groups[groupName]!!.add(user)
 							out.println(Json.encodeToString(comp.groups[groupName]))
@@ -60,8 +60,7 @@ class CompetitionServlet : HttpServlet() {
 				}
 			}
 			"creategroup" -> {
-				if (compId != null && groupName != null) {
-					val comp = Competition.comps[compId.toInt() - 1]
+				if (comp != null && groupName != null) {
 					if (groupName.isBlank()) {
 						groupName = "Group ${comp.nextGroupNum}"
 					}
@@ -74,8 +73,7 @@ class CompetitionServlet : HttpServlet() {
 				} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
 			}
 			"leavegroup" -> {
-				if (compId != null) {
-					val comp = Competition.comps[compId.toInt() - 1]
+				if (comp != null) {
 					comp.groups[comp.getGroupName(user)]!!.remove(user)
 				} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
 			}
