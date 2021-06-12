@@ -91,6 +91,7 @@ object Templates {
 		}
 		form(method = FormMethod.post) {
 			id = "editcomp"
+			onSubmit = "return false"
 			div {
 				formLabel {
 					htmlFor = "title"
