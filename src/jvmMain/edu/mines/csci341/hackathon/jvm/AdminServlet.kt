@@ -2,6 +2,7 @@ package edu.mines.csci341.hackathon.jvm
 
 import java.io.IOException
 import javax.servlet.ServletException
+import javax.servlet.annotation.MultipartConfig
 import javax.servlet.annotation.WebServlet
 import javax.servlet.http.*
 import kotlinx.html.stream.appendHTML
@@ -15,6 +16,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
+@MultipartConfig
 @WebServlet("/admin")
 class AdminServlet : HttpServlet() {
 	
@@ -41,12 +43,15 @@ class AdminServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
+		val compId: String = req.getParameter("id")!!
+		val parts: Map<String, String> = req.parts.associate { part: Part ->
+			part.name to part.content
+		}
+		val json = Json.encodeToString(parts + ("id" to compId))
+		val comp = Json { isLenient = true }.decodeFromString<Competition>(json)
 		res.setContentType("application/json;charset=UTF-8")
 		res.getWriter().use { out ->
-			val params = req.getParameterMap()
-			val json = Json.encodeToString(params.mapValues { (_, v) -> v[0] })
-			val comp = Json { isLenient = true }.decodeFromString<Competition>(json)
-			if (params["id"]?.get(0) == "0") {
+			if (compId == "0") {
 				val newComp = Database.addCompetition(comp)
 				out.println(Json.encodeToString(newComp))
 			} else {
@@ -67,5 +72,8 @@ class AdminServlet : HttpServlet() {
 
 	companion object {
 		private val serialVersionUID = 1L
+		
+		val Part.content: String
+			get() = inputStream.bufferedReader().use { it.readText() }
 	}
 }

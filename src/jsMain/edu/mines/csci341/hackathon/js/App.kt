@@ -104,7 +104,6 @@ fun main() {
 		}
 		xhr.open("POST", window.location.search)
 		val formData = FormData(compForm)
-		// for some reason sending multipart/form-data doesn't work
-		xhr.send(URLSearchParams(formData))
+		xhr.send(formData)
 	})
 }
