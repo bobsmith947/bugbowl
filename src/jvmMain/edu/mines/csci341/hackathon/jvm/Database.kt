@@ -12,6 +12,7 @@ object Database {
 	private val db: DataSource
 	private var _conn: Connection? = null
 	private val conn get() = _conn!!
+	private val defaultJson = Json { encodeDefaults = true }
 	
 	val users: MutableMap<Int, User> = mutableMapOf()
 	val comps: MutableMap<Int, Competition> = mutableMapOf()
@@ -73,7 +74,7 @@ object Database {
 				"INSERT INTO hackathon_competitions (data) VALUES (?::jsonb)",
 				Statement.RETURN_GENERATED_KEYS
 			)
-			ps.setString(1, Json.encodeToString(comp))
+			ps.setString(1, defaultJson.encodeToString(comp))
 			ps.executeUpdate()
 			val rs: ResultSet = ps.generatedKeys
 			if (rs.next()) {
@@ -107,12 +108,13 @@ object Database {
 	
 	fun updateCompetition(comp: Competition) {
 		var ps: PreparedStatement? = null
+		val oldComp = comps[comp.id]!!
 		try {
 			ps = conn.prepareStatement("UPDATE hackathon_competitions SET data = ?::jsonb WHERE id = ?")
-			ps.setString(1, Json.encodeToString(comp))
+			ps.setString(1, defaultJson.encodeToString(comp))
 			ps.setInt(2, comp.id)
 			ps.executeUpdate()
-			comps[comp.id] = comp
+			comps[comp.id] = comp.copy(created = oldComp.created)
 		} catch (e: SQLException) {
 			System.err.println(e.message)
 		} finally {

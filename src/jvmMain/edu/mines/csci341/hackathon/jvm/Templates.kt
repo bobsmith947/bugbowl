@@ -35,7 +35,7 @@ object Templates {
 	}
 	
 	fun BODY.makeCompTable(
-		comps: List<Competition> = Database.comps.values.toList(),
+		comps: List<Competition> = Database.comps.values.toList().sortedByDescending { it.created },
 		edit: Boolean = false
 	) = table("table caption-top") {
 		caption("fs-1 fw-bold") { +"Competitions" }
