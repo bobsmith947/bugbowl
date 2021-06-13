@@ -40,45 +40,40 @@ class CompetitionServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
+		val compId: String = req.getParameter("id")!!
 		val action: String? = req.getParameter("action")
-		val compId: String? = req.getParameter("id")
 		var groupName: String? = req.getParameter("group")
 		val user = req.getSession(false).getAttribute("user") as User
-		val comp = Database.comps[compId?.toInt()]
+		val comp = Database.comps[compId.toInt()]!!
 		when (action) {
 			"joingroup" -> {
 				res.setContentType("application/json;charset=UTF-8")
 				res.getWriter().use { out ->
-					if (comp != null) {
-						if (groupName != null) {
-							comp.groups[groupName]!!.add(user)
-							out.println(Json.encodeToString(comp.groups[groupName]))
-						} else {
-							out.println(Json.encodeToString(comp.groups.keys))
-						}
-					} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
+					if (groupName != null) {
+						comp.groups[groupName]!!.add(user)
+						out.println(Json.encodeToString(comp.groups[groupName]))
+					} else {
+						out.println(Json.encodeToString(comp.groups.keys))
+					}
 				}
 			}
 			"creategroup" -> {
-				if (comp != null && groupName != null) {
-					if (groupName.isBlank()) {
-						groupName = "Group ${comp.nextGroupNum}"
-					}
-					if (comp.groups.containsKey(groupName)) {
-						res.sendError(HttpServletResponse.SC_FORBIDDEN)
-					} else {
-						comp.groups[groupName] = mutableListOf(user)
-						comp.submissions[groupName] = mutableListOf()
-					}
-				} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
+				if (groupName?.isBlank() ?: true) {
+					groupName = "Group ${comp.nextGroupNum}"
+				}
+				if (comp.groups.containsKey(groupName)) {
+					res.sendError(HttpServletResponse.SC_FORBIDDEN)
+				} else {
+					comp.groups[groupName!!] = mutableListOf(user)
+					comp.submissions[groupName] = mutableListOf()
+				}
 			}
 			"leavegroup" -> {
-				if (comp != null) {
-					comp.groups[comp.getGroupName(user)]!!.remove(user)
-				} else res.sendError(HttpServletResponse.SC_BAD_REQUEST)
+				comp.groups[comp.getGroupName(user)]!!.remove(user)
 			}
 			else -> res.sendError(HttpServletResponse.SC_BAD_REQUEST)
 		}
+		Database.updateCompetition(comp)
 	}
 
 	companion object {
