@@ -109,17 +109,22 @@ object Database {
 	fun updateCompetition(comp: Competition) {
 		var ps: PreparedStatement? = null
 		val oldComp = comps[comp.id]!!
+		val newComp = comp.copy(created = oldComp.created).apply {
+			expectedResults = oldComp.expectedResults
+			groups = oldComp.groups
+			submissions = oldComp.submissions
+		}
 		try {
 			ps = conn.prepareStatement("UPDATE hackathon_competitions SET data = ?::jsonb WHERE id = ?")
-			ps.setString(1, defaultJson.encodeToString(comp))
+			ps.setString(1, defaultJson.encodeToString(newComp))
 			ps.setInt(2, comp.id)
 			ps.executeUpdate()
-			comps[comp.id] = comp.copy(created = oldComp.created)
 		} catch (e: SQLException) {
 			System.err.println(e.message)
 		} finally {
 			ps?.close()
 		}
+		comps[comp.id] = newComp
 	}
 	
 	fun removeCompetition(compId: Int) {
@@ -128,11 +133,11 @@ object Database {
 			ps = conn.prepareStatement("DELETE FROM hackathon_competitions WHERE id = ?")
 			ps.setInt(1, compId)
 			ps.executeUpdate()
-			comps.remove(compId)
 		} catch (e: SQLException) {
 			System.err.println(e.message)
 		} finally {
 			ps?.close()
 		}
+		comps.remove(compId)
 	}
 }
