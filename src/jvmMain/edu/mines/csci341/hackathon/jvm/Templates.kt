@@ -121,6 +121,7 @@ object Templates {
 				textArea("8", "80", TextAreaWrap.hard, "form-control") {
 					id = "contents"
 					name = "contents"
+					spellCheck = false
 					+(comp?.contents ?: "")
 				}
 			}
@@ -150,10 +151,14 @@ object Templates {
 		if (comp.isActive) {
 			textArea("8", "80", TextAreaWrap.hard, "form-control") {
 				id = "contents"
+				spellCheck = false
 				+(comp.submissions[group]?.lastOrNull()?.contents ?: comp.contents)
 			}
 			if (group != null) {
-				button(type = ButtonType.button, classes = "btn btn-primary d-block my-3") { +"Check Submission" }
+				button(type = ButtonType.button, classes = "btn btn-primary d-block my-3") {
+					id = "checksub"
+					+"Check Submission"
+				}
 				h2("d-inline-block") { +"$group Members" }
 				button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
 					id = "leavegroup"
