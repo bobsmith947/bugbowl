@@ -2,6 +2,7 @@ package edu.mines.csci341.hackathon.js
 
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.dom.clear
 import org.w3c.dom.*
 import org.w3c.dom.events.Event
 import org.w3c.dom.url.URLSearchParams
@@ -12,12 +13,14 @@ import kotlinx.serialization.json.Json
 import kotlinx.html.*
 import kotlinx.html.dom.*
 
+typealias Result = List<Pair<String, String>>
+
 fun main() {
 	document.getElementById("creategroup")?.addEventListener("click", {
 		val group: String? = window.prompt("Enter a group name (leave blank for default):")
 		if (group != null) {
 			val xhr = XMLHttpRequest()
-			xhr.onreadystatechange = fun(ev: Event) {
+			xhr.onreadystatechange = fun (ev: Event) {
 				if (xhr.readyState == XMLHttpRequest.DONE) {
 					when (xhr.status.toInt()) {
 						200 -> window.location.reload()
@@ -36,7 +39,7 @@ fun main() {
 	
 	document.getElementById("leavegroup")?.addEventListener("click", {
 		val xhr = XMLHttpRequest()
-		xhr.onreadystatechange = fun(ev: Event) {
+		xhr.onreadystatechange = fun (ev: Event) {
 			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 200) {
 				window.location.reload()
 			}
@@ -49,11 +52,11 @@ fun main() {
 	
 	document.getElementById("joingroup")?.addEventListener("click", {
 		val xhr = XMLHttpRequest()
-		xhr.onreadystatechange = fun(ev: Event) {
+		xhr.onreadystatechange = fun (ev: Event) {
 			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 200) {
 				val groupNames = Json.decodeFromString<List<String>>(xhr.responseText)
 				val optGroup = document.querySelector("#joingroup optgroup") as HTMLOptGroupElement
-				optGroup.innerHTML = ""
+				optGroup.clear()
 				groupNames.forEach { name ->
 					optGroup.append.option { +name }
 				}
@@ -65,9 +68,9 @@ fun main() {
 		xhr.send(params)
 	})
 	
-	document.getElementById("joingroup")?.addEventListener("input", { ev ->
+	document.getElementById("joingroup")?.addEventListener("input", { ev: Event ->
 		val xhr = XMLHttpRequest()
-		xhr.onreadystatechange = fun(ev: Event) {
+		xhr.onreadystatechange = fun (ev2: Event) {
 			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 200) {
 				window.location.reload()
 			}
@@ -82,9 +85,40 @@ fun main() {
 		}
 	})
 	
+	document.getElementById("checksub")?.addEventListener("click", {
+		val xhr = XMLHttpRequest()
+		xhr.onreadystatechange = fun (ev: Event) {
+			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 200) {
+				val (results, expected) = Json.decodeFromString<Pair<Result, Result>>(xhr.responseText)
+				val input = document.getElementById("input") as HTMLTableRowElement
+				input.clear()
+				input.append.th { +"Input" }
+				val output = document.getElementById("output") as HTMLTableRowElement
+				output.clear()
+				output.append.th { +"Output" }
+				
+				for (i in results.indices) {
+					input.append.td { +results[i].first }
+					output.append.td {
+						if (results[i].second == expected[i].second) {
+							classes += "table-success"
+						} else {
+							// TODO show tooltip with expected result
+							classes += "table-danger"
+						}
+						+results[i].second
+					}
+				}
+			}
+		}
+		xhr.open("POST", window.location.search)
+		val contents = document.getElementById("contents") as HTMLTextAreaElement
+		xhr.send(contents.value)
+	})
+	
 	document.getElementById("deletecomp")?.addEventListener("click", {
 		val xhr = XMLHttpRequest()
-		xhr.onreadystatechange = fun(ev: Event) {
+		xhr.onreadystatechange = fun (ev: Event) {
 			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 204) {
 				window.location.replace(window.location.pathname)
 			}
@@ -93,17 +127,16 @@ fun main() {
 		xhr.send()
 	})
 	
-	val compForm = document.getElementById("editcomp") as? HTMLFormElement
-	compForm?.addEventListener("submit", { ev: Event ->
+	document.getElementById("editcomp")?.addEventListener("submit", { ev: Event ->
 		ev.preventDefault()
 		val xhr = XMLHttpRequest()
-		xhr.onreadystatechange = fun(ev2: Event) {
+		xhr.onreadystatechange = fun (ev2: Event) {
 			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 200) {
 				window.location.replace(window.location.pathname)
 			}
 		}
 		xhr.open("POST", window.location.search)
-		val formData = FormData(compForm)
+		val formData = FormData(ev.target as HTMLFormElement)
 		xhr.send(formData)
 	})
 }

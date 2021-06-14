@@ -159,6 +159,11 @@ object Templates {
 					id = "checksub"
 					+"Check Submission"
 				}
+				table("table table-sm table-borderless caption-top") {
+					caption { +"Submission Results" }
+					tr { id = "input" }
+					tr { id = "output" }
+				}
 				h2("d-inline-block") { +"$group Members" }
 				button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
 					id = "leavegroup"

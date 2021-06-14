@@ -22,7 +22,7 @@ class CompetitionServlet : HttpServlet() {
 		val compId: String? = req.getParameter("id")
 		val user = req.getSession(false).getAttribute("user") as User
 		res.setContentType("text/html;charset=UTF-8")
-		res.getWriter().use { out ->
+		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
 			out.appendHTML().html {
 				makeHead("Competition")
@@ -48,7 +48,7 @@ class CompetitionServlet : HttpServlet() {
 		when (action) {
 			"joingroup" -> {
 				res.setContentType("application/json;charset=UTF-8")
-				res.getWriter().use { out ->
+				res.writer.use { out ->
 					if (groupName != null) {
 						comp.groups[groupName]!!.add(user)
 						out.println(Json.encodeToString(comp.groups[groupName]))
@@ -71,7 +71,17 @@ class CompetitionServlet : HttpServlet() {
 			"leavegroup" -> {
 				comp.groups[comp.getGroupName(user)]!!.remove(user)
 			}
-			else -> res.sendError(HttpServletResponse.SC_BAD_REQUEST)
+			else -> {
+				val contents = req.reader.use { it.readText() }
+				val sub = Submission(0, contents)
+				// TODO get results from running submission
+				sub.results = listOf("input" to "output")
+				comp.submissions[comp.getGroupName(user)]!!.add(sub)
+				res.setContentType("application/json;charset=UTF-8")
+				res.writer.use { out ->
+					out.println(Json.encodeToString(sub.results to comp.expectedResults))
+				}
+			}
 		}
 		Database.updateCompetition(comp)
 	}

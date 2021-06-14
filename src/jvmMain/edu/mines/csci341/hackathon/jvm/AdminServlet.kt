@@ -24,7 +24,7 @@ class AdminServlet : HttpServlet() {
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: String? = req.getParameter("id")
 		res.setContentType("text/html;charset=UTF-8")
-		res.getWriter().use { out ->
+		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
 			out.appendHTML().html {
 				makeHead("Admin")
@@ -50,7 +50,7 @@ class AdminServlet : HttpServlet() {
 		val json = Json.encodeToString(parts + ("id" to compId))
 		val comp = Json { isLenient = true }.decodeFromString<Competition>(json)
 		res.setContentType("application/json;charset=UTF-8")
-		res.getWriter().use { out ->
+		res.writer.use { out ->
 			if (compId == "0") {
 				val newComp = Database.addCompetition(comp)
 				out.println(Json.encodeToString(newComp))
