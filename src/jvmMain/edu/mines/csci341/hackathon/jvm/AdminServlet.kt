@@ -12,9 +12,9 @@ import edu.mines.csci341.hackathon.jvm.Templates.makeNav
 import edu.mines.csci341.hackathon.jvm.Templates.makeCompTable
 import edu.mines.csci341.hackathon.jvm.Templates.makeCompEdit
 import edu.mines.csci341.hackathon.Competition
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.*
 
 @MultipartConfig
 @WebServlet("/admin")
@@ -44,11 +44,16 @@ class AdminServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: String = req.getParameter("id")!!
-		val parts: Map<String, String> = req.parts.associate { part: Part ->
-			part.name to part.content
+		val parts: Map<String, JsonElement> = req.parts.associate { part: Part ->
+			val content = part.content
+			part.name to try {
+				Json.parseToJsonElement(content)
+			} catch (e: SerializationException) {
+				JsonPrimitive(content)
+			}
 		}
-		val json = Json.encodeToString(parts + ("id" to compId))
-		val comp = Json { isLenient = true }.decodeFromString<Competition>(json)
+		val json = JsonObject(parts + ("id" to JsonPrimitive(compId)))
+		val comp = Json { isLenient = true }.decodeFromJsonElement<Competition>(json)
 		res.setContentType("application/json;charset=UTF-8")
 		res.writer.use { out ->
 			if (compId == "0") {

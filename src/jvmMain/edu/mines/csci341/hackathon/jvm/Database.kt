@@ -110,9 +110,9 @@ object Database {
 		var ps: PreparedStatement? = null
 		val oldComp = comps[comp.id]!!
 		val newComp = comp.copy(created = oldComp.created).apply {
-			expectedResults = oldComp.expectedResults
-			groups = oldComp.groups
-			submissions = oldComp.submissions
+			expectedResults = if (comp.expectedResults.isEmpty()) oldComp.expectedResults else comp.expectedResults
+			groups = if (comp.groups.isEmpty()) oldComp.groups else comp.groups
+			submissions = if (comp.submissions.isEmpty()) oldComp.submissions else comp.submissions
 		}
 		try {
 			ps = conn.prepareStatement("UPDATE hackathon_competitions SET data = ?::jsonb WHERE id = ?")

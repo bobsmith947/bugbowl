@@ -8,6 +8,7 @@ import org.w3c.dom.events.Event
 import org.w3c.dom.url.URLSearchParams
 import org.w3c.xhr.FormData
 import org.w3c.xhr.XMLHttpRequest
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.html.*
@@ -116,6 +117,15 @@ fun main() {
 		xhr.send(contents.value)
 	})
 	
+	document.getElementById("addtest")?.addEventListener("click", {
+		(document.getElementById("input") as HTMLTableRowElement).append.td {
+			textInput()
+		}
+		(document.getElementById("output") as HTMLTableRowElement).append.td {
+			textInput()
+		}
+	})
+	
 	document.getElementById("deletecomp")?.addEventListener("click", {
 		val xhr = XMLHttpRequest()
 		xhr.onreadystatechange = fun (ev: Event) {
@@ -137,6 +147,16 @@ fun main() {
 		}
 		xhr.open("POST", window.location.search)
 		val formData = FormData(ev.target as HTMLFormElement)
+		val inputs = document.querySelectorAll("#input input")
+		val outputs = document.querySelectorAll("#output input")
+		val results: Result = List(inputs.length) { i ->
+			val input = inputs[i] as HTMLInputElement
+			val output = outputs[i] as HTMLInputElement
+			if (input.value.isNotBlank() && output.value.isNotBlank()) {
+				input.value to output.value
+			} else null
+		}.filterNotNull()
+		formData.append("expectedResults", Json.encodeToString(results))
 		xhr.send(formData)
 	})
 }

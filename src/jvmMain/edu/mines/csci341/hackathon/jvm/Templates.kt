@@ -136,6 +136,31 @@ object Templates {
 					+"Active"
 				}
 			}
+			table("table table-sm table-borderless caption-top") {
+				caption { +"Expected Results" }
+				tr {
+					id = "input"
+					th { +"Input" }
+					comp?.expectedResults?.forEach { (input, _) ->
+						td {
+							textInput { value = input }
+						}
+					}
+				}
+				tr {
+					id = "output"
+					th { +"Output" }
+					comp?.expectedResults?.forEach { (_, output) ->
+						td {
+							textInput { value = output }
+						}
+					}
+				}
+			}
+			button(type = ButtonType.button, classes = "btn btn-secondary me-3") {
+				id = "addtest"
+				+"Add expected result"
+			}
 			button(type = ButtonType.submit, classes = "btn btn-primary") { +"Submit" }
 		}
 	}
