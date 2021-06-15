@@ -74,8 +74,7 @@ class CompetitionServlet : HttpServlet() {
 			else -> {
 				val contents = req.reader.use { it.readText() }
 				val sub = Submission(0, contents)
-				// TODO get results from running submission
-				sub.results = listOf("input" to "output")
+				SubmissionRunner.runSubmission(sub, comp.expectedResults.unzip().first)
 				comp.submissions[comp.getGroupName(user)]!!.add(sub)
 				res.setContentType("application/json;charset=UTF-8")
 				res.writer.use { out ->
@@ -83,6 +82,7 @@ class CompetitionServlet : HttpServlet() {
 				}
 			}
 		}
+		// TODO don't need to update the database every time
 		Database.updateCompetition(comp)
 	}
 
