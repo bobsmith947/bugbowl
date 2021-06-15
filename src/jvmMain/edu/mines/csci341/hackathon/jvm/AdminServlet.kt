@@ -7,10 +7,6 @@ import javax.servlet.annotation.WebServlet
 import javax.servlet.http.*
 import kotlinx.html.stream.appendHTML
 import kotlinx.html.*
-import edu.mines.csci341.hackathon.jvm.Templates.makeHead
-import edu.mines.csci341.hackathon.jvm.Templates.makeNav
-import edu.mines.csci341.hackathon.jvm.Templates.makeCompTable
-import edu.mines.csci341.hackathon.jvm.Templates.makeCompEdit
 import edu.mines.csci341.hackathon.Competition
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
@@ -27,14 +23,16 @@ class AdminServlet : HttpServlet() {
 		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
 			out.appendHTML().html {
-				makeHead("Admin")
-				body {
-					makeNav()
-					if (compId == null) {
-						a("?id=0", classes = "btn btn-primary mt-3") { +"Add a Competition" }
-						makeCompTable(edit = true)
-					} else {
-						makeCompEdit(compId.toInt())
+				with(Templates) {
+					makeHead("Admin")
+					body {
+						makeNav()
+						if (compId == null) {
+							a("?id=0", classes = "btn btn-primary mt-3") { +"Add a Competition" }
+							makeCompTable(edit = true)
+						} else {
+							makeCompEdit(compId.toInt())
+						}
 					}
 				}
 			}

@@ -6,10 +6,6 @@ import javax.servlet.annotation.WebServlet
 import javax.servlet.http.*
 import kotlinx.html.stream.appendHTML
 import kotlinx.html.*
-import edu.mines.csci341.hackathon.jvm.Templates.makeHead
-import edu.mines.csci341.hackathon.jvm.Templates.makeNav
-import edu.mines.csci341.hackathon.jvm.Templates.makeCompTable
-import edu.mines.csci341.hackathon.jvm.Templates.makeCompSubmit
 import edu.mines.csci341.hackathon.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -25,13 +21,15 @@ class CompetitionServlet : HttpServlet() {
 		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
 			out.appendHTML().html {
-				makeHead("Competition")
-				body {
-					makeNav()
-					if (compId == null) {
-						makeCompTable()
-					} else {
-						makeCompSubmit(compId.toInt(), user)
+				with(Templates) {
+					makeHead("Competition")
+					body {
+						makeNav()
+						if (compId == null) {
+							makeCompTable()
+						} else {
+							makeCompSubmit(compId.toInt(), user)
+						}
 					}
 				}
 			}
