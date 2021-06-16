@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 import javax.naming.InitialContext
 import javax.sql.DataSource
 import java.sql.*
+import java.util.concurrent.ConcurrentHashMap
 
 object Database {
 	private val db: DataSource
@@ -14,8 +15,8 @@ object Database {
 	private val conn get() = _conn!!
 	private val defaultJson = Json { encodeDefaults = true }
 	
-	val users: MutableMap<Int, User> = mutableMapOf()
-	val comps: MutableMap<Int, Competition> = mutableMapOf()
+	val users: MutableMap<Int, User> = ConcurrentHashMap()
+	val comps: MutableMap<Int, Competition> = ConcurrentHashMap()
 	
 	init {
 		val ctx = InitialContext()
