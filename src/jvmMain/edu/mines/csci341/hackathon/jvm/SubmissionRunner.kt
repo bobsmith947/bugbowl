@@ -1,33 +1,22 @@
 package edu.mines.csci341.hackathon.jvm
 
-import java.util.concurrent.Executors.newSingleThreadExecutor
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-import java.util.concurrent.ExecutionException
+import java.util.concurrent.*
 import edu.mines.csci341.hackathon.Submission
-import rars.api.Program
+import rars.api.*
 import rars.simulator.Simulator
 
-object SubmissionRunner {
+object SubmissionRunner : Runnable {
 	private const val TIMEOUT_SECONDS = 10L
-	private val executor: ExecutorService = newSingleThreadExecutor()
-	private val program = Program()
+	private const val TIMEOUT_STEPS = 10_000_000
+	private val executor: ExecutorService = Executors.newSingleThreadExecutor()
+	private val program = Program(Options().apply {
+		maxSteps = TIMEOUT_STEPS
+	})
+	private val submissionQueue = SynchronousQueue<Pair<Submission, List<String>>>(true)
 	
 	fun runSubmission(sub: Submission, inputs: List<String>): String {
-		val outputs = MutableList<String>(inputs.size) { "null" }
-		val task: Future<*> = synchronized(this) {
-			executor.submit {
-				// TODO handle warnings/errors
-				program.assembleString(sub.contents)
-				inputs.forEachIndexed { index, input ->
-					program.setup(null, input)
-					program.simulate()
-					outputs[index] = program.getSTDOUT().trim('\u0000')
-				}
-			}
-		}
+		val task: Future<*> = executor.submit(this)
+		submissionQueue.put(sub to inputs)
 		val message: String = try {
 			task.get(TIMEOUT_SECONDS, TimeUnit.SECONDS)
 			"Submission ran normally."
@@ -39,7 +28,19 @@ object SubmissionRunner {
 			Simulator.getInstance().stopExecution()
 			task.cancel(true)
 		}
-		sub.results = inputs zip outputs
 		return message
+	}
+	
+	override fun run() {
+		val (sub, inputs) = submissionQueue.take()
+		val outputs = MutableList<String>(inputs.size) { "null" }
+		// TODO handle warnings/errors
+		program.assembleString(sub.contents)
+		inputs.forEachIndexed { index, input ->
+			program.setup(null, input)
+			program.simulate()
+			outputs[index] = program.getSTDOUT().trim('\u0000')
+		}
+		sub.results = inputs zip outputs
 	}
 }
