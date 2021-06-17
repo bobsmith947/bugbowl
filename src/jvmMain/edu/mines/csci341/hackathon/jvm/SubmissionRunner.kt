@@ -25,8 +25,10 @@ object SubmissionRunner : Runnable {
 		} catch (e: ExecutionException) {
 			"Submission failed to run."
 		} finally {
-			Simulator.getInstance().stopExecution()
-			task.cancel(true)
+			// send an interrupt and stop current execution in case it has not finished
+			if (task.cancel(true)) {
+				Simulator.getInstance().stopExecution()
+			}
 		}
 		return message
 	}
@@ -38,7 +40,22 @@ object SubmissionRunner : Runnable {
 		program.assembleString(sub.contents)
 		inputs.forEachIndexed { index, input ->
 			program.setup(null, input)
-			program.simulate()
+			val reason: Simulator.Reason = program.simulate()
+			if (Thread.interrupted()) {
+				// when the task times out, Simulator.stopExecution() forces program.simulate() to return
+				// we can then receive an interrupt to prevent further execution
+				return
+			}
+			// TODO handle reasons
+			when (reason) {
+				Simulator.Reason.BREAKPOINT -> Unit
+				Simulator.Reason.EXCEPTION -> Unit
+				Simulator.Reason.MAX_STEPS -> Unit
+				Simulator.Reason.NORMAL_TERMINATION -> Unit
+				Simulator.Reason.CLIFF_TERMINATION -> Unit
+				Simulator.Reason.PAUSE -> Unit
+				Simulator.Reason.STOP -> Unit
+			}
 			outputs[index] = program.getSTDOUT().trim('\u0000')
 		}
 		sub.results = inputs zip outputs
