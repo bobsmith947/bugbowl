@@ -90,7 +90,9 @@ fun main() {
 		val xhr = XMLHttpRequest()
 		xhr.onreadystatechange = fun (ev: Event) {
 			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 200) {
-				val (results, expected) = Json.decodeFromString<Pair<Result, Result>>(xhr.responseText)
+				val (results, expected, message) =
+					Json.decodeFromString<Triple<Result, Result, String>>(xhr.responseText)
+				(document.getElementById("message") as HTMLTableCaptionElement).textContent = message
 				val input = document.getElementById("input") as HTMLTableRowElement
 				input.clear()
 				input.append.th { +"Input" }

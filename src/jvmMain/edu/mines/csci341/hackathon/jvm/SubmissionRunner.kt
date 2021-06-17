@@ -16,14 +16,22 @@ object SubmissionRunner : Runnable {
 	
 	fun runSubmission(sub: Submission, inputs: List<String>): String {
 		val task: Future<*> = executor.submit(this)
+		// the HTTP thread will be blocked here until the submission thread is available
 		submissionQueue.put(sub to inputs)
 		val message: String = try {
 			task.get(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-			"Submission ran normally."
+			"Submission ran normally. Results are below."
 		} catch (e: TimeoutException) {
-			"Submission timed out."
+			"""
+			Submission timed out after $TIMEOUT_SECONDS seconds.
+			This most likely means there is an infinite loop in the code.
+			""".trimIndent()
 		} catch (e: ExecutionException) {
-			"Submission failed to run."
+			"""
+			Submission failed to run.
+			This is either due to an error in assembling the code
+			or an uncaught interrupt during the simulation.
+			""".trimIndent()
 		} finally {
 			// send an interrupt and stop current execution in case it has not finished
 			if (task.cancel(true)) {
@@ -46,17 +54,15 @@ object SubmissionRunner : Runnable {
 				// we can then receive an interrupt to prevent further execution
 				return
 			}
-			// TODO handle reasons
-			when (reason) {
-				Simulator.Reason.BREAKPOINT -> Unit
-				Simulator.Reason.EXCEPTION -> Unit
-				Simulator.Reason.MAX_STEPS -> Unit
-				Simulator.Reason.NORMAL_TERMINATION -> Unit
-				Simulator.Reason.CLIFF_TERMINATION -> Unit
-				Simulator.Reason.PAUSE -> Unit
-				Simulator.Reason.STOP -> Unit
+			outputs[index] = when (reason) {
+				Simulator.Reason.BREAKPOINT -> "Breakpoint reached"
+				Simulator.Reason.EXCEPTION -> "Exception thrown"
+				Simulator.Reason.MAX_STEPS -> "Max steps exceeded"
+				Simulator.Reason.NORMAL_TERMINATION, Simulator.Reason.CLIFF_TERMINATION ->
+					program.getSTDOUT().trim('\u0000')
+				Simulator.Reason.PAUSE -> "Simulation paused"
+				Simulator.Reason.STOP -> "Simulation stopped"
 			}
-			outputs[index] = program.getSTDOUT().trim('\u0000')
 		}
 		sub.results = inputs zip outputs
 	}

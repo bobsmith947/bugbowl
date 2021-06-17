@@ -185,7 +185,10 @@ object Templates {
 					+"Check Submission"
 				}
 				table("table table-sm table-borderless caption-top") {
-					caption { +"Submission Results" }
+					caption {
+						id = "message"
+						+"Submission Results"
+					}
 					tr { id = "input" }
 					tr { id = "output" }
 				}
