@@ -26,7 +26,7 @@ class AdminServlet : HttpServlet() {
 				with(Templates) {
 					makeHead("Admin")
 					body {
-						makeNav()
+						makeNav("admin", true)
 						if (compId == null) {
 							a("?id=0", classes = "btn btn-primary mt-3") { +"Add a Competition" }
 							makeCompTable(edit = true)

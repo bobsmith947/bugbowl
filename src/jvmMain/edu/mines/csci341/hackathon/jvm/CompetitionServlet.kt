@@ -24,7 +24,7 @@ class CompetitionServlet : HttpServlet() {
 				with(Templates) {
 					makeHead("Competition")
 					body {
-						makeNav()
+						makeNav("competition", user.isAdmin)
 						if (compId == null) {
 							makeCompTable()
 						} else {

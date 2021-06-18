@@ -7,7 +7,7 @@ import kotlinx.html.*
 import edu.mines.csci341.hackathon.*
 
 object Templates {
-	const val APP_NAME = "OrgaBOWL"
+	const val APP_NAME = "BugBOWL"
 	
 	fun FlowOrInteractiveOrPhrasingContent
 			.formLabel(block: LABEL.() -> Unit) = label("form-label", block)
@@ -28,9 +28,34 @@ object Templates {
 		script(ScriptType.textJavaScript, "index.js") { defer = true }
 	}
 	
-	fun BODY.makeNav() = nav("navbar fixed-top navbar-dark bg-primary navbar-expand-md") {
+	fun BODY.makeNav(
+		current: String,
+		admin: Boolean
+	) = nav("navbar navbar-expand navbar-dark bg-primary fixed-top") {
 		div("container") {
 			a("./", classes = "navbar-brand") { +APP_NAME }
+			div("navbar-collapse") {
+				ul("navbar-nav") {
+					li("nav-item") {
+						a("./competition", classes = "nav-link") {
+							if (current == "competition") {
+								classes += "active"
+							}
+							+"Competitions"
+						}
+					}
+					if (admin) {
+						li("nav-item") {
+							a("./admin", classes = "nav-link") {
+								if (current == "admin") {
+									classes += "active"
+								}
+								+"Admin"
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	
