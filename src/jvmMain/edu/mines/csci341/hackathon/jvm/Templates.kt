@@ -158,7 +158,19 @@ object Templates {
 				}
 				formCheckLabel {
 					htmlFor = "active"
-					+"Active"
+					+"Active (override)"
+				}
+			}
+			div("input-group") {
+				span("input-group-text") { +"Activate at" }
+				dateTimeLocalInput(classes = "form-control") {
+					id = "start"
+					value = comp?.activated?.first?.toString() ?: ""
+				}
+				span("input-group-text") { +"until" }
+				dateTimeLocalInput(classes = "form-control") {
+					id = "end"
+					value = comp?.activated?.second?.toString() ?: ""
 				}
 			}
 			table("table table-sm table-borderless caption-top") {
@@ -248,7 +260,7 @@ object Templates {
 			h2 { +"Ranking" }
 			ol("list-group list-group-numbered") {
 				comp.submissions.mapValues { (_, subs) ->
-					subs.filter { comp.checkSubmission(it) }
+					subs.filter(comp::checkSubmission)
 						.minOfOrNull { it.timestamp }
 				}.filterValues { it != null }.toList()
 					.sortedBy { (_, timestamp) -> timestamp }

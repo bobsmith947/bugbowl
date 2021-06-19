@@ -149,6 +149,7 @@ fun main() {
 		}
 		xhr.open("POST", window.location.search)
 		val formData = FormData(ev.target as HTMLFormElement)
+		
 		val inputs = document.querySelectorAll("#input input")
 		val outputs = document.querySelectorAll("#output input")
 		val results: Result = List(inputs.length) { i ->
@@ -159,6 +160,13 @@ fun main() {
 			} else null
 		}.filterNotNull()
 		formData.append("expectedResults", Json.encodeToString(results))
+		
+		val start = document.getElementById("start") as HTMLInputElement
+		val end = document.getElementById("end") as HTMLInputElement
+		if (start.value.isNotBlank() && end.value.isNotBlank()) {
+			formData.append("activated", Json.encodeToString(start.value to end.value))
+		}
+		
 		xhr.send(formData)
 	})
 }

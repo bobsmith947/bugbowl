@@ -1,11 +1,7 @@
 package edu.mines.csci341.hackathon
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
+import kotlinx.datetime.*
 import kotlinx.serialization.Serializable
-import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.toLocalDate
 
 @Serializable
 data class Competition(
@@ -13,13 +9,24 @@ data class Competition(
 	val title: String,
 	val description: String,
 	val contents: String,
-	val isActive: Boolean = false,
 	val created: LocalDate = Clock.System.now()
 		.toLocalDateTime(TimeZone.currentSystemDefault()).date,
+	val activated: Pair<LocalDateTime, LocalDateTime>? = null,
 ) {
 	var expectedResults: List<Pair<String, String>> = listOf()
 	var groups: MutableMap<String, MutableList<User>> = mutableMapOf()
 	var submissions: MutableMap<String, MutableList<Submission>> = mutableMapOf()
+	
+	var isActive: Boolean = false
+		get() {
+			val current: LocalDateTime = Clock.System.now()
+				.toLocalDateTime(TimeZone.currentSystemDefault())
+			val default: LocalDateTime = Instant.DISTANT_FUTURE
+				.toLocalDateTime(TimeZone.currentSystemDefault())
+			val start: LocalDateTime = activated?.first ?: default
+			val end: LocalDateTime = activated?.second ?: default
+			return field || (current in start..end)
+		}
 	
 	val nextGroupNum: Int
 		get() = groups.size + 1
@@ -42,7 +49,7 @@ data class Competition(
 	fun getGroupName(user: User): String? {
 		groups.forEach { (name, users) ->
 			if (users.contains(user)) {
-				return@getGroupName name
+				return name
 			}
 		}
 		return null
