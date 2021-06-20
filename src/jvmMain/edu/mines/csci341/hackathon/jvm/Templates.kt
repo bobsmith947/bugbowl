@@ -223,7 +223,7 @@ object Templates {
 				}
 				table("table table-sm table-borderless caption-top") {
 					caption {
-						id = "message"
+						id = "status"
 						+"Submission Results"
 					}
 					tr { id = "input" }

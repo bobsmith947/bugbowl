@@ -20,7 +20,7 @@ object SubmissionRunner : Runnable {
 		submissionQueue.put(sub to inputs)
 		val message: String = try {
 			task.get(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-			"Submission ran normally. Results are below."
+			"Submission ran normally, results are below."
 		} catch (e: TimeoutException) {
 			"""
 			Submission timed out after $TIMEOUT_SECONDS seconds.
@@ -29,7 +29,7 @@ object SubmissionRunner : Runnable {
 		} catch (e: ExecutionException) {
 			"""
 			Submission failed to run.
-			This is either due to an error in assembling the code
+			This is either due to an error in assembling the code,
 			or an uncaught interrupt during the simulation.
 			""".trimIndent()
 		} finally {

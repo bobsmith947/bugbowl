@@ -69,6 +69,9 @@ class CompetitionServlet : HttpServlet() {
 			"leavegroup" -> {
 				comp.groups[comp.getGroupName(user)]!!.remove(user)
 			}
+			"updategroup" -> {
+				Database.updateCompetition(comp)
+			}
 			else -> {
 				val contents = req.reader.use { it.readText() }
 				val sub = Submission(0, contents)
@@ -80,8 +83,6 @@ class CompetitionServlet : HttpServlet() {
 				}
 			}
 		}
-		// TODO don't need to update the database every time
-		//Database.updateCompetition(comp)
 	}
 
 	companion object {
