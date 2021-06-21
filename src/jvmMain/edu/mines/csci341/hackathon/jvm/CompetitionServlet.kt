@@ -15,7 +15,7 @@ class CompetitionServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
-		val compId: String? = req.getParameter("id")
+		val compId: Int? = req.getParameter("id")?.toInt()
 		val user = req.getSession(false).getAttribute("user") as User
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
@@ -28,7 +28,7 @@ class CompetitionServlet : HttpServlet() {
 						if (compId == null) {
 							makeCompTable()
 						} else {
-							makeCompSubmit(compId.toInt(), user)
+							makeCompSubmit(compId, user)
 						}
 					}
 				}
@@ -38,11 +38,11 @@ class CompetitionServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
-		val compId: String = req.getParameter("id")!!
+		val compId: Int = req.getParameter("id")!!.toInt()
 		val action: String? = req.getParameter("action")
 		var groupName: String? = req.getParameter("group")
 		val user = req.getSession(false).getAttribute("user") as User
-		val comp = Database.comps[compId.toInt()]!!
+		val comp: Competition = Database.comps[compId]!!
 		when (action) {
 			"joingroup" -> {
 				res.setContentType("application/json;charset=UTF-8")

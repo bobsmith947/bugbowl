@@ -100,23 +100,16 @@ object Database {
 		} finally {
 			ps?.close()
 		}
-		if (newComp != null) {
-			comps[newComp.id] = newComp
-			return newComp
-		}
-		return comp
+		return newComp ?: comp
 	}
 	
-	fun updateCompetition(comp: Competition) {
+	fun updateCompetition(comp: Competition): Competition {
 		var ps: PreparedStatement? = null
 		val oldComp = comps[comp.id]!!
 		val newComp = comp.copy(created = oldComp.created).apply {
-			expectedResults = (if (comp.expectedResults.isEmpty()) oldComp.expectedResults
-					else comp.expectedResults)
-			(if (comp.groups.isEmpty()) oldComp.groups
-					else comp.groups).mapValuesTo(groups) { it.value.toMutableList() }
-			(if (comp.submissions.isEmpty()) oldComp.submissions
-					else comp.submissions).mapValuesTo(submissions) {
+			expectedResults = comp.expectedResults
+			oldComp.groups.mapValuesTo(groups) { it.value.toMutableList() }
+			oldComp.submissions.mapValuesTo(submissions) {
 				it.value.filter(::checkSubmission).toMutableList()
 			}
 			isActive = comp.isActive
@@ -131,7 +124,7 @@ object Database {
 		} finally {
 			ps?.close()
 		}
-		comps[comp.id] = newComp
+		return newComp
 	}
 	
 	fun removeCompetition(compId: Int) {

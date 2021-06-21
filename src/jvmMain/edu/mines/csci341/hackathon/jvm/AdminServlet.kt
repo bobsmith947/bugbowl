@@ -18,7 +18,7 @@ class AdminServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
-		val compId: String? = req.getParameter("id")
+		val compId: Int? = req.getParameter("id")?.toInt()
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
@@ -31,7 +31,7 @@ class AdminServlet : HttpServlet() {
 							a("?id=0", classes = "btn btn-primary mt-3") { +"Add a Competition" }
 							makeCompTable(edit = true)
 						} else {
-							makeCompEdit(compId.toInt())
+							makeCompEdit(compId)
 						}
 					}
 				}
@@ -41,7 +41,7 @@ class AdminServlet : HttpServlet() {
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
-		val compId: String = req.getParameter("id")!!
+		val compId: Int = req.getParameter("id")!!.toInt()
 		val parts: Map<String, JsonElement> = req.parts.associate { part: Part ->
 			val content = part.content
 			part.name to try {
@@ -54,22 +54,18 @@ class AdminServlet : HttpServlet() {
 		val comp = Json { isLenient = true }.decodeFromJsonElement<Competition>(json)
 		res.setContentType("application/json;charset=UTF-8")
 		res.writer.use { out ->
-			if (compId == "0") {
-				val newComp = Database.addCompetition(comp)
+			with(Database) {
+				val newComp = if (compId == 0) addCompetition(comp) else updateCompetition(comp)
+				comps[compId] = newComp
 				out.println(Json.encodeToString(newComp))
-			} else {
-				Database.updateCompetition(comp)
-				out.println(Json.encodeToString(comp))
 			}
 		}
 	}
 	
 	@Throws(ServletException::class, IOException::class)
 	override fun doDelete(req: HttpServletRequest, res: HttpServletResponse) {
-		val compId: String? = req.getParameter("id")
-		if (compId != null) {
-			Database.removeCompetition(compId.toInt())
-		}
+		val compId: Int = req.getParameter("id")!!.toInt()
+		Database.removeCompetition(compId)
 		res.setStatus(HttpServletResponse.SC_NO_CONTENT)
 	}
 
