@@ -4,6 +4,7 @@ import java.util.concurrent.*
 import edu.mines.csci341.hackathon.Submission
 import rars.api.*
 import rars.simulator.Simulator
+import rars.riscv.SyscallLoader
 
 object SubmissionRunner : Runnable {
 	private const val TIMEOUT_SECONDS = 10L
@@ -13,6 +14,13 @@ object SubmissionRunner : Runnable {
 		maxSteps = TIMEOUT_STEPS
 	})
 	private val submissionQueue = SynchronousQueue<Pair<Submission, List<String>>>(true)
+	
+	init {
+		// disable syscalls that we don't want students to use/there's no need to be used
+		// these include getcwd, open/close, lseek, as well as syscalls that wait for user input
+		val disabledSyscalls = setOf(17, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 62, 1024)
+		SyscallLoader.getSyscallList().removeIf { disabledSyscalls.contains(it.getNumber()) }
+	}
 	
 	fun runSubmission(sub: Submission, inputs: List<String>): String {
 		val task: Future<*> = executor.submit(this)
@@ -27,11 +35,17 @@ object SubmissionRunner : Runnable {
 			This most likely means there is an infinite loop in the code.
 			""".trimIndent()
 		} catch (e: ExecutionException) {
-			"""
-			Submission failed to run.
-			This is either due to an error in assembling the code,
-			or an uncaught interrupt during the simulation.
-			""".trimIndent()
+			val cause = e.cause
+			when (cause) {
+				is rars.AssemblyException -> buildString {
+					appendLine("Assembly error:")
+					cause.errors().getErrorMessages().forEach {
+						appendLine("${it.getMessage()}, ")
+					}
+				}.dropLast(3)
+				is rars.SimulationException -> "Simulation error: ${cause.error().getMessage()}"
+				else -> "Unknown error"
+			}
 		} finally {
 			// send an interrupt and stop current execution in case it has not finished
 			if (task.cancel(true)) {
