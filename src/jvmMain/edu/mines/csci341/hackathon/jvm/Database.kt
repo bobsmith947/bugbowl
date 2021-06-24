@@ -36,6 +36,7 @@ object Database {
 			rs = stmt.executeQuery("SELECT data FROM hackathon_competitions")
 			while (rs.next()) {
 				val comp = Json.decodeFromString<Competition>(rs.getString(1))
+				comp.isActive = comp.checkActive()
 				comps[comp.id] = comp
 			}
 		} catch (e: SQLException) {

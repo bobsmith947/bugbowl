@@ -18,15 +18,7 @@ data class Competition(
 	var submissions: MutableMap<String, MutableList<Submission>> = mutableMapOf()
 	
 	var isActive: Boolean = false
-		get() {
-			val current: LocalDateTime = Clock.System.now()
-				.toLocalDateTime(TimeZone.currentSystemDefault())
-			val default: LocalDateTime = Instant.DISTANT_FUTURE
-				.toLocalDateTime(TimeZone.currentSystemDefault())
-			val start: LocalDateTime = activated?.first ?: default
-			val end: LocalDateTime = activated?.second ?: default
-			return field || (current in start..end)
-		}
+		get() = field || checkActive()
 	
 	val nextGroupNum: Int
 		get() = groups.size + 1
@@ -44,6 +36,16 @@ data class Competition(
 	
 	fun checkSubmission(sub: Submission): Boolean {
 		return sub.results == expectedResults
+	}
+	
+	fun checkActive(): Boolean {
+		val current: LocalDateTime = Clock.System.now()
+			.toLocalDateTime(TimeZone.currentSystemDefault())
+		val default: LocalDateTime = Instant.DISTANT_FUTURE
+			.toLocalDateTime(TimeZone.currentSystemDefault())
+		val start: LocalDateTime = activated?.first ?: default
+		val end: LocalDateTime = activated?.second ?: default
+		return current in start..end
 	}
 	
 	fun getGroupName(user: User): String? {
