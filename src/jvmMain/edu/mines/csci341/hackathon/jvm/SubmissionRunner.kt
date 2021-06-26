@@ -1,10 +1,17 @@
 package edu.mines.csci341.hackathon.jvm
 
 import java.util.concurrent.*
+import java.util.regex.*
+import kotlin.streams.asSequence
 import edu.mines.csci341.hackathon.Submission
 import rars.api.*
 import rars.simulator.Simulator
 import rars.riscv.SyscallLoader
+import rars.riscv.AbstractSyscall
+import rars.riscv.syscalls.NullString
+import rars.riscv.hardware.RegisterFile
+import rars.riscv.hardware.FloatingPointRegisterFile
+import rars.util.SystemIO
 
 object SubmissionRunner : Runnable {
 	private const val TIMEOUT_SECONDS = 10L
@@ -16,10 +23,15 @@ object SubmissionRunner : Runnable {
 	private val submissionQueue = SynchronousQueue<Pair<Submission, List<String>>>(true)
 	
 	init {
+		val syscalls: MutableList<AbstractSyscall> = SyscallLoader.getSyscallList()
 		// disable syscalls that we don't want students to use/there's no need to be used
 		// these include getcwd, open/close, lseek, as well as syscalls that wait for user input
 		val disabledSyscalls = setOf(17, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 62, 1024)
-		SyscallLoader.getSyscallList().removeIf { disabledSyscalls.contains(it.getNumber()) }
+		syscalls.removeIf { disabledSyscalls.contains(it.getNumber()) }
+		// enable custom printf syscall
+		syscalls.add(SyscallPrintF().apply {
+			setNumber(1025)
+		})
 	}
 	
 	fun runSubmission(sub: Submission, inputs: List<String>): String {
@@ -44,7 +56,7 @@ object SubmissionRunner : Runnable {
 					}
 				}.dropLast(3)
 				is rars.SimulationException -> "Simulation error: ${cause.error().getMessage()}"
-				else -> "Unknown error"
+				else -> "Unknown error: ${cause?.message}"
 			}
 		} finally {
 			// send an interrupt and stop current execution in case it has not finished
@@ -79,5 +91,36 @@ object SubmissionRunner : Runnable {
 			}
 		}
 		sub.results = inputs zip outputs
+	}
+}
+
+class SyscallPrintF() : AbstractSyscall(
+	"PrintF",
+	"Prints a formatted string to standard output. Indexed arguments are not supported.",
+	"""
+	a0 = format string
+	a1-a6 = positional arguments
+	""".trimIndent(),
+	"N/A"
+) {
+	private val specifier: Pattern = Pattern.compile("%[-#+ 0,(]*\\d*(\\.\\d+)?(\\w)")
+	
+	override fun simulate(stmnt: rars.ProgramStatement) {
+		val fmt: String = NullString.get(stmnt)
+		val args: Array<Any?> = arrayOfNulls(6)
+		specifier.matcher(fmt).results()
+			.limit(6).asSequence()
+			.forEachIndexed { index, match ->
+				val intReg = "a${index + 1}"
+				val floatReg = "fa${index + 1}"
+				args[index] = when (match.group(2)) {
+					"s", "S" -> NullString.get(stmnt, intReg)
+					"c", "C", "d", "o", "x", "X" -> RegisterFile.getValue(intReg)
+					"e", "E", "f", "g", "G", "a", "A" -> FloatingPointRegisterFile.getFloatFromRegister(floatReg)
+					else -> null
+				}
+			}
+		val out = fmt.format(*args)
+		SystemIO.writeToFile(1, out.toByteArray(), out.length)
 	}
 }
