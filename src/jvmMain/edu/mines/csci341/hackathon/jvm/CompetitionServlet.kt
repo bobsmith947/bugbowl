@@ -43,7 +43,9 @@ class CompetitionServlet : HttpServlet() {
 		var groupName: String? = req.getParameter("group")
 		val user = req.getSession(false).getAttribute("user") as User
 		val comp: Competition = Database.comps[compId]!!
-		when (action) {
+		if (!comp.isActive) {
+			res.sendError(HttpServletResponse.SC_FORBIDDEN)
+		} else when (action) {
 			"joingroup" -> {
 				res.setContentType("application/json;charset=UTF-8")
 				res.writer.use { out ->
