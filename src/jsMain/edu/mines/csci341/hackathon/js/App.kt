@@ -141,7 +141,7 @@ fun main() {
 	
 	document.getElementById("addtest")?.addEventListener("click", {
 		(document.getElementById("input") as HTMLTableRowElement).append.td {
-			textInput()
+			textArea(content = "Separate multiple inputs by a newline.")
 		}
 		(document.getElementById("output") as HTMLTableRowElement).append.td {
 			textInput()
@@ -170,15 +170,13 @@ fun main() {
 		xhr.open("POST", window.location.search)
 		val formData = FormData(ev.target as HTMLFormElement)
 		
-		val inputs = document.querySelectorAll("#input input")
+		val inputs = document.querySelectorAll("#input textarea")
 		val outputs = document.querySelectorAll("#output input")
 		val results: Result = List(inputs.length) { i ->
-			val input = inputs[i] as HTMLInputElement
+			val input = inputs[i] as HTMLTextAreaElement
 			val output = outputs[i] as HTMLInputElement
-			if (input.value.isNotBlank() && output.value.isNotBlank()) {
-				input.value to output.value
-			} else null
-		}.filterNotNull()
+			input.value to output.value
+		}.filter { it.first.isNotBlank() }
 		formData.append("expectedResults", Json.encodeToString(results))
 		
 		val start = document.getElementById("start") as HTMLInputElement

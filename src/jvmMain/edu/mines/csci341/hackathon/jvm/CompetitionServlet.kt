@@ -77,7 +77,7 @@ class CompetitionServlet : HttpServlet() {
 			else -> {
 				val contents = req.reader.use { it.readText() }
 				val sub = Submission(0, contents)
-				val msg = SubmissionRunner.runSubmission(sub, comp.expectedResults.unzip().first)
+				val msg = SubmissionRunner.runSubmission(sub, comp.inputs)
 				comp.submissions[comp.getGroupName(user)]!!.add(sub)
 				res.setContentType("application/json;charset=UTF-8")
 				res.writer.use { out ->

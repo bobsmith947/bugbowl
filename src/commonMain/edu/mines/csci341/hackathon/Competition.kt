@@ -9,6 +9,7 @@ data class Competition(
 	val title: String,
 	val description: String,
 	val contents: String,
+	val solutionContents: String? = null,
 	val created: LocalDate = Clock.System.now()
 		.toLocalDateTime(TimeZone.currentSystemDefault()).date,
 	val activated: Pair<LocalDateTime, LocalDateTime>? = null,
@@ -19,6 +20,9 @@ data class Competition(
 	
 	var isActive: Boolean = false
 		get() = field || checkActive()
+	
+	val inputs: List<String>
+		get() = expectedResults.unzip().first
 	
 	val nextGroupNum: Int
 		get() = groups.size + 1

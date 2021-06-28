@@ -143,12 +143,25 @@ object Templates {
 					htmlFor = "contents"
 					+"Base code contents"
 				}
-				textArea("8", "80", TextAreaWrap.hard, "form-control") {
+				textArea("8", "80", TextAreaWrap.soft, "form-control") {
 					id = "contents"
 					name = "contents"
 					spellCheck = false
 					+(comp?.contents ?: "")
 				}
+			}
+			div {
+				formLabel {
+					htmlFor = "solution"
+					+"Solution code contents"
+				}
+				textArea("8", "80", TextAreaWrap.soft, "form-control") {
+					id = "solution"
+					name = "solutionContents"
+					spellCheck = false
+					+(comp?.solutionContents ?: "")
+				}
+				p("form-text") { +"If a solution is specified, outputs will be automatically generated." }
 			}
 			div("form-check") {
 				checkBoxInput(name = "isActive", classes = "form-check-input") {
@@ -180,7 +193,7 @@ object Templates {
 					th { +"Input" }
 					comp?.expectedResults?.forEach { (input, _) ->
 						td {
-							textInput { value = input }
+							textArea(content = input)
 						}
 					}
 				}
@@ -211,7 +224,7 @@ object Templates {
 		h1 { +comp.title }
 		p { +comp.description }
 		if (comp.isActive) {
-			textArea("8", "80", TextAreaWrap.hard, "form-control") {
+			textArea("8", "80", TextAreaWrap.soft, "form-control") {
 				id = "contents"
 				spellCheck = false
 				+(comp.submissions[group]?.lastOrNull()?.contents ?: comp.contents)

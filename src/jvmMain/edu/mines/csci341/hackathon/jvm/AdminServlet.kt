@@ -7,7 +7,7 @@ import javax.servlet.annotation.WebServlet
 import javax.servlet.http.*
 import kotlinx.html.stream.appendHTML
 import kotlinx.html.*
-import edu.mines.csci341.hackathon.Competition
+import edu.mines.csci341.hackathon.*
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
@@ -43,7 +43,8 @@ class AdminServlet : HttpServlet() {
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int = req.getParameter("id")!!.toInt()
 		val parts: Map<String, JsonElement> = req.parts.associate { part: Part ->
-			val content = part.content
+			// we have to normalize line endings because RARS freaks out with CRLF
+			val content = part.content.trimIndent()
 			part.name to try {
 				Json.parseToJsonElement(content)
 			} catch (e: SerializationException) {
@@ -52,6 +53,11 @@ class AdminServlet : HttpServlet() {
 		}
 		val json = JsonObject(parts + ("id" to JsonPrimitive(compId)))
 		val comp = Json { isLenient = true }.decodeFromJsonElement<Competition>(json)
+		if (comp.solutionContents?.isNotBlank() == true) {
+			val solution = Submission(0, comp.solutionContents)
+			SubmissionRunner.runSubmission(solution, comp.inputs)
+			comp.expectedResults = solution.results
+		}
 		res.setContentType("application/json;charset=UTF-8")
 		res.writer.use { out ->
 			with(Database) {
