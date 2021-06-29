@@ -54,7 +54,8 @@ object SubmissionRunner : Runnable {
 					cause.errors().getErrorMessages().forEach {
 						appendLine("${it.getMessage()}, ")
 					}
-				}.dropLast(3)
+					dropLast(3)
+				}
 				is rars.SimulationException -> "Simulation error: ${cause.error().getMessage()}"
 				else -> "Unknown error: ${cause?.message}"
 			}
@@ -107,21 +108,26 @@ class SyscallPrintF() : AbstractSyscall(
 ) {
 	private val specifier: Pattern = Pattern.compile("%[-#+ 0,(]*\\d*(\\.\\d+)?(\\w)")
 	
+	@ExperimentalUnsignedTypes
 	override fun simulate(stmnt: rars.ProgramStatement) {
-		val fmt: String = NullString.get(stmnt)
+		var fmt: String = NullString.get(stmnt)
 		val args: Array<Any?> = arrayOfNulls(6)
-		specifier.matcher(fmt).results()
+		val matches: Matcher = specifier.matcher(fmt)
+		matches.results()
 			.limit(6).asSequence()
 			.forEachIndexed { index, match ->
 				val intReg = "a${index + 1}"
 				val floatReg = "fa${index + 1}"
 				args[index] = when (match.group(2)) {
 					"s", "S" -> NullString.get(stmnt, intReg)
+					"u" -> RegisterFile.getValue(intReg).toUInt()
 					"c", "C", "d", "o", "x", "X" -> RegisterFile.getValue(intReg)
 					"e", "E", "f", "g", "G", "a", "A" -> FloatingPointRegisterFile.getFloatFromRegister(floatReg)
 					else -> null
 				}
 			}
+		// the Java Formatter has no 'u' conversion, so we can use the 's' conversion instead
+		fmt = matches.replaceAll { it.group().replace('u', 's') }
 		val out = fmt.format(*args)
 		SystemIO.writeToFile(1, out.toByteArray(), out.length)
 	}
