@@ -141,7 +141,7 @@ fun main() {
 	
 	document.getElementById("addtest")?.addEventListener("click", {
 		(document.getElementById("input") as HTMLTableRowElement).append.td {
-			textArea(content = "Separate multiple inputs by a newline.")
+			textArea { placeholder = "Separate multiple inputs by a newline." }
 		}
 		(document.getElementById("output") as HTMLTableRowElement).append.td {
 			textInput()
