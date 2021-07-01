@@ -46,19 +46,37 @@ object Database {
 		}
 	}
 	
-	// database index may allow for faster lookups
-	// rather than searching through user ID map in-place
-	// or allocating another map with user names as keys
 	fun getUser(userName: String): User? {
 		var ps: PreparedStatement? = null
 		val user: User? = try {
 			ps = conn.prepareStatement("SELECT data FROM hackathon_users WHERE data ->> 'name' = ?")
 			ps.setString(1, userName)
-			val rs: ResultSet = ps.executeQuery()
+			var rs: ResultSet = ps.executeQuery()
 			if (rs.next()) {
 				Json.decodeFromString<User>(rs.getString(1))
 			} else {
-				throw SQLException("Username not found in database.")
+				// add the user to the database when logging in for the first time
+				val newUser = User(0, userName)
+				ps.close()
+				ps = conn.prepareStatement(
+					"INSERT INTO hackathon_users (data) VALUES (?::jsonb)",
+					Statement.RETURN_GENERATED_KEYS
+				)
+				ps.setString(1, defaultJson.encodeToString(newUser))
+				ps.executeUpdate()
+				// update with the correct ID
+				rs = ps.generatedKeys
+				if (rs.next()) {
+					val id = rs.getInt(1)
+					ps.close()
+					ps = conn.prepareStatement("""
+												UPDATE hackathon_users
+												SET data = jsonb_set(data, '{id}', id::text::jsonb)
+												WHERE id = ?""".trimIndent())
+					ps.setInt(1, id)
+					ps.executeUpdate()
+					newUser.copy(id)
+				} else throw SQLException("Could not get generated ID.")
 			}
 		} catch (e: SQLException) {
 			System.err.println(e.message)
@@ -78,23 +96,19 @@ object Database {
 			)
 			ps.setString(1, defaultJson.encodeToString(comp))
 			ps.executeUpdate()
+			// update with the correct ID
 			val rs: ResultSet = ps.generatedKeys
 			if (rs.next()) {
-				// get the generated ID
 				val id = rs.getInt(1)
 				ps.close()
-				// update the JSON to reflect the inserted ID
 				ps = conn.prepareStatement("""
 											UPDATE hackathon_competitions
 											SET data = jsonb_set(data, '{id}', id::text::jsonb)
 											WHERE id = ?""".trimIndent())
 				ps.setInt(1, id)
 				ps.executeUpdate()
-				// make a copy of the competition with the correct ID
 				comp.copy(id)
-			} else {
-				throw SQLException("Could not get the generated ID for this competition.")
-			}
+			} else throw SQLException("Could not get generated ID.")
 		} catch (e: SQLException) {
 			System.err.println(e.message)
 			null
