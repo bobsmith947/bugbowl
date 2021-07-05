@@ -1,8 +1,5 @@
 package edu.mines.csci341.hackathon.jvm
 
-import kotlinx.datetime.periodUntil
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
 import kotlinx.html.*
 import edu.mines.csci341.hackathon.*
 
@@ -278,13 +275,7 @@ object Templates {
 				}.filterValues { it != null }.toList()
 					.sortedBy { (_, timestamp) -> timestamp }
 					.forEach { (groupName, timestamp) ->
-						listGroupItem {
-							+"$groupName: "
-							+timestamp!!.periodUntil(
-								Clock.System.now(),
-								TimeZone.currentSystemDefault()
-							).toString()
-						}
+						listGroupItem { +"$groupName: $timestamp" }
 					}
 			}
 		}
