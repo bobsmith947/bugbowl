@@ -85,6 +85,19 @@ fun main() {
 		}
 	})
 	
+	document.getElementById("removegroup")?.addEventListener("click", {
+		val xhr = XMLHttpRequest()
+		xhr.onreadystatechange = {
+			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 204) {
+				val params = URLSearchParams(window.location.search)
+				params.delete("group")
+				window.location.replace("?$params")
+			}
+		}
+		xhr.open("DELETE", window.location.search)
+		xhr.send()
+	})
+	
 	document.getElementById("checksub")?.addEventListener("click", {
 		val xhr = XMLHttpRequest()
 		xhr.onreadystatechange = {
@@ -108,7 +121,7 @@ fun main() {
 							params.append("action", "updategroup")
 							xhr.send(params)
 						}
-						+"Save this correct submission as your group's answer"
+						+"Save this submission"
 					}
 				}
 				
@@ -148,7 +161,7 @@ fun main() {
 		}
 	})
 	
-	document.getElementById("deletecomp")?.addEventListener("click", {
+	document.getElementById("removecomp")?.addEventListener("click", {
 		val xhr = XMLHttpRequest()
 		xhr.onreadystatechange = {
 			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 204) {

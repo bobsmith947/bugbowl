@@ -29,27 +29,23 @@ class AdminServlet : HttpServlet() {
 					body {
 						makeNav("admin", true)
 						if (compId == null) {
-							a("?id=0", classes = "btn btn-primary mt-3") { +"Add a Competition" }
+							a("?id=0", classes = "btn btn-primary mt-3") { +"Add a competition" }
 							makeCompTable(edit = true)
 						} else if (groupName == null) {
 							makeCompEdit(compId)
 						} else {
 							val comp = Database.comps[compId]!!
 							h1 { +"$groupName Submission" }
+							pre { +comp.correctSubmissions[groupName]!!.contents }
 							h2("d-inline-block") { +"$groupName Members" }
-							// TODO make this do something
 							button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
-								+"Remove group"
+								id = "removegroup"
+								+"Remove group from competition"
 							}
 							ul("list-group") {
 								comp.groups[groupName]!!.forEach {
 									listGroupItem { +it.name }
 								}
-							}
-							pre { +comp.correctSubmissions[groupName]!!.contents }
-							// TODO make this do something
-							button(type = ButtonType.button, classes = "btn btn-danger") {
-								+"Remove submission"
 							}
 						}
 					}
@@ -82,7 +78,7 @@ class AdminServlet : HttpServlet() {
 			with(Database) {
 				val newComp = if (compId == 0) addCompetition(comp) else updateCompetition(comp)
 				comps[compId] = newComp
-				out.println(Json.encodeToString(newComp))
+				out.println(defaultJson.encodeToString(newComp))
 			}
 		}
 	}
@@ -90,7 +86,19 @@ class AdminServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doDelete(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int = req.getParameter("id")!!.toInt()
-		Database.removeCompetition(compId)
+		val groupName: String? = req.getParameter("group")
+		with(Database) {
+			if (groupName == null) {
+				removeCompetition(compId)
+			} else {
+				updateCompetition(
+					comps[compId]!!.apply {
+						groups.remove(groupName)
+						submissions.remove(groupName)
+					}
+				)
+			}
+		}
 		res.setStatus(HttpServletResponse.SC_NO_CONTENT)
 	}
 

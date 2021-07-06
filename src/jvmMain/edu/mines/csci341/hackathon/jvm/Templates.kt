@@ -107,8 +107,8 @@ object Templates {
 		if (comp != null) {
 			h1("d-inline-block") { +"Edit Competition ${comp.id}" }
 			button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
-				id = "deletecomp"
-				+"Delete"
+				id = "removecomp"
+				+"Remove Competition"
 			}
 			makeRanking(comp)
 		} else {
@@ -245,7 +245,7 @@ object Templates {
 				h2("d-inline-block") { +"$group Members" }
 				button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
 					id = "leavegroup"
-					+"Leave group"
+					+"Leave this group"
 				}
 				ul("list-group") {
 					comp.groups[group]!!.forEach {
@@ -274,13 +274,13 @@ object Templates {
 	
 	fun DIV.makeRanking(comp: Competition) = div {
 		h2 { +"Ranking" }
-		div("list-group list-group-numbered") {
+		div("list-group") {
 			comp.correctSubmissions.toList()
 				.filter { it.second != null }
 				.sortedBy { it.second!!.timestamp }
-				.forEach { (group, sub) ->
-					listGroupAction("&group=${encode(group, "UTF-8")}") {
-						+"$group: ${sub!!.timestamp}"
+				.forEachIndexed { index, (group, sub) ->
+					listGroupAction("?id=${comp.id}&group=${encode(group, "UTF-8")}") {
+						+"#${index + 1} $group: ${sub!!.timestamp}"
 					}
 				}
 		}

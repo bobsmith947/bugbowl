@@ -13,7 +13,7 @@ object Database {
 	private val db: DataSource
 	private var _conn: Connection? = null
 	private val conn get() = _conn!!
-	private val defaultJson = Json { encodeDefaults = true }
+	val defaultJson = Json { encodeDefaults = true }
 	
 	val users: MutableMap<Int, User> = ConcurrentHashMap()
 	val comps: MutableMap<Int, Competition> = ConcurrentHashMap()

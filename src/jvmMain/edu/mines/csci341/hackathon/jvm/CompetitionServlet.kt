@@ -32,11 +32,15 @@ class CompetitionServlet : HttpServlet() {
 							makeCompSubmit(compId, user)
 						} else {
 							val comp = Database.comps[compId]!!
-							h1 { +"$groupName Submission" }
-							pre { +comp.correctSubmissions[groupName]!!.contents }
-							// TODO make this do something
-							button(type = ButtonType.button, classes = "btn btn-danger") {
-								+"Report submission"
+							if (comp.isActive) {
+								res.sendError(HttpServletResponse.SC_FORBIDDEN)
+							} else {
+								h1 { +"$groupName Submission" }
+								pre { +comp.correctSubmissions[groupName]!!.contents }
+								// TODO make this do something
+								button(type = ButtonType.button, classes = "btn btn-danger") {
+									+"Report this submission"
+								}
 							}
 						}
 					}
