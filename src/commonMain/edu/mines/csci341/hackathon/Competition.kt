@@ -30,6 +30,12 @@ data class Competition(
 	val participants: Set<User>
 		get() = groups.flatMap { it.value }.toSet()
 	
+	val correctSubmissions: Map<String, Submission?>
+		get() = submissions.mapValues { (_, subs) ->
+			subs.filter(::checkSubmission)
+				.minByOrNull { it.timestamp }
+		}
+	
 	val semester: String
 		get() = when (created.monthNumber) {
 			in 1..4 -> "Spring ${created.year}"

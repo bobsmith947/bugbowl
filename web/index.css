@@ -7,6 +7,6 @@ body {
 	padding: 50px;
 }
 
-#contents, #solution {
+#contents, #solution, pre {
 	font-family: "Roboto Mono", monospace !important;
 }

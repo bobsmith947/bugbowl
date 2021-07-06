@@ -2,6 +2,7 @@ package edu.mines.csci341.hackathon.jvm
 
 import kotlinx.html.*
 import edu.mines.csci341.hackathon.*
+import java.net.URLEncoder.encode
 
 object Templates {
 	const val APP_NAME = "BugBOWL"
@@ -10,7 +11,8 @@ object Templates {
 			.formLabel(block: LABEL.() -> Unit) = label("form-label", block)
 	fun FlowOrInteractiveOrPhrasingContent
 			.formCheckLabel(block: LABEL.() -> Unit) = label("form-check-label", block)
-	fun OL.listGroupItem(block: LI.() -> Unit) = li("list-group-item", block)
+	fun DIV.listGroupAction(href: String, block: A.() -> Unit) =
+		a(href, "_self", "list-group-item list-group-item-action", block)
 	fun UL.listGroupItem(block: LI.() -> Unit) = li("list-group-item", block)
 	
 	fun HTML.makeHead(title: String) = head {
@@ -108,6 +110,7 @@ object Templates {
 				id = "deletecomp"
 				+"Delete"
 			}
+			makeRanking(comp)
 		} else {
 			h1 { +"New Competition" }
 		}
@@ -242,7 +245,7 @@ object Templates {
 				h2("d-inline-block") { +"$group Members" }
 				button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
 					id = "leavegroup"
-					+"Leave $group"
+					+"Leave group"
 				}
 				ul("list-group") {
 					comp.groups[group]!!.forEach {
@@ -266,18 +269,20 @@ object Templates {
 					optGroup("Available Groups")
 				}
 			}
-		} else {
-			h2 { +"Ranking" }
-			ol("list-group list-group-numbered") {
-				comp.submissions.mapValues { (_, subs) ->
-					subs.filter(comp::checkSubmission)
-						.minOfOrNull { it.timestamp }
-				}.filterValues { it != null }.toList()
-					.sortedBy { (_, timestamp) -> timestamp }
-					.forEach { (groupName, timestamp) ->
-						listGroupItem { +"$groupName: $timestamp" }
+		} else makeRanking(comp)
+	}
+	
+	fun DIV.makeRanking(comp: Competition) = div {
+		h2 { +"Ranking" }
+		div("list-group list-group-numbered") {
+			comp.correctSubmissions.toList()
+				.filter { it.second != null }
+				.sortedBy { it.second!!.timestamp }
+				.forEach { (group, sub) ->
+					listGroupAction("&group=${encode(group, "UTF-8")}") {
+						+"$group: ${sub!!.timestamp}"
 					}
-			}
+				}
 		}
 	}
 }

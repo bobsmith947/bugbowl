@@ -19,6 +19,7 @@ class AdminServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int? = req.getParameter("id")?.toInt()
+		val groupName: String? = req.getParameter("group")
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
@@ -30,8 +31,26 @@ class AdminServlet : HttpServlet() {
 						if (compId == null) {
 							a("?id=0", classes = "btn btn-primary mt-3") { +"Add a Competition" }
 							makeCompTable(edit = true)
-						} else {
+						} else if (groupName == null) {
 							makeCompEdit(compId)
+						} else {
+							val comp = Database.comps[compId]!!
+							h1 { +"$groupName Submission" }
+							h2("d-inline-block") { +"$groupName Members" }
+							// TODO make this do something
+							button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
+								+"Remove group"
+							}
+							ul("list-group") {
+								comp.groups[groupName]!!.forEach {
+									listGroupItem { +it.name }
+								}
+							}
+							pre { +comp.correctSubmissions[groupName]!!.contents }
+							// TODO make this do something
+							button(type = ButtonType.button, classes = "btn btn-danger") {
+								+"Remove submission"
+							}
 						}
 					}
 				}

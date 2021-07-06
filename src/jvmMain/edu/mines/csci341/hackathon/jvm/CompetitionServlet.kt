@@ -16,6 +16,7 @@ class CompetitionServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int? = req.getParameter("id")?.toInt()
+		val groupName: String? = req.getParameter("group")
 		val user = req.getSession(false).getAttribute("user") as User
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
@@ -27,8 +28,16 @@ class CompetitionServlet : HttpServlet() {
 						makeNav("competition", user.isAdmin)
 						if (compId == null) {
 							makeCompTable()
-						} else {
+						} else if (groupName == null) {
 							makeCompSubmit(compId, user)
+						} else {
+							val comp = Database.comps[compId]!!
+							h1 { +"$groupName Submission" }
+							pre { +comp.correctSubmissions[groupName]!!.contents }
+							// TODO make this do something
+							button(type = ButtonType.button, classes = "btn btn-danger") {
+								+"Report submission"
+							}
 						}
 					}
 				}
