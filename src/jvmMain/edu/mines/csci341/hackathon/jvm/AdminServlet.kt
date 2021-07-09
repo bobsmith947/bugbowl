@@ -77,7 +77,7 @@ class AdminServlet : HttpServlet() {
 		res.writer.use { out ->
 			with(Database) {
 				val newComp = if (compId == 0) addCompetition(comp) else updateCompetition(comp)
-				comps[compId] = newComp
+				comps[newComp.id] = newComp
 				out.println(defaultJson.encodeToString(newComp))
 			}
 		}
