@@ -32,13 +32,17 @@ class CompetitionServlet : HttpServlet() {
 							makeCompSubmit(compId, user)
 						} else {
 							val comp = Database.comps[compId]!!
+							val sub = comp.correctSubmissions[groupName]!!
 							if (comp.isActive) {
 								res.sendError(HttpServletResponse.SC_FORBIDDEN)
 							} else {
 								h1 { +"$groupName Submission" }
-								pre { +comp.correctSubmissions[groupName]!!.contents }
-								// TODO make this do something
+								if (sub.reportedBy != null) {
+									p("text-danger") { +"This submission has been reported." }
+								}
+								pre { +sub.contents }
 								button(type = ButtonType.button, classes = "btn btn-danger") {
+									id = "reportgroup"
 									+"Report this submission"
 								}
 							}
@@ -86,6 +90,18 @@ class CompetitionServlet : HttpServlet() {
 			}
 			"updategroup" -> {
 				Database.updateCompetition(comp)
+			}
+			"reportgroup" -> {
+				val sub = comp.correctSubmissions[groupName]!!
+				res.setContentType("text/plain")
+				res.writer.use { out ->
+					if (sub.reportedBy == null) {
+						out.println("Submission successfully reported.")
+						sub.reportedBy = user.name
+					} else {
+						out.println("Submission has already been reported.")
+					}
+				}
 			}
 			else -> {
 				val contents = req.reader.use { it.readText() }

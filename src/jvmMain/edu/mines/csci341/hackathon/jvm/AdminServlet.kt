@@ -1,5 +1,6 @@
 package edu.mines.csci341.hackathon.jvm
 
+import java.net.URLEncoder.encode
 import java.io.IOException
 import javax.servlet.ServletException
 import javax.servlet.annotation.MultipartConfig
@@ -20,6 +21,7 @@ class AdminServlet : HttpServlet() {
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int? = req.getParameter("id")?.toInt()
 		val groupName: String? = req.getParameter("group")
+		val action: String? = req.getParameter("action")
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
@@ -35,8 +37,19 @@ class AdminServlet : HttpServlet() {
 							makeCompEdit(compId)
 						} else {
 							val comp = Database.comps[compId]!!
+							val sub = comp.correctSubmissions[groupName]!!
 							h1 { +"$groupName Submission" }
-							pre { +comp.correctSubmissions[groupName]!!.contents }
+							if (action == "clear") {
+								sub.reportedBy = null
+							} else if (sub.reportedBy != null) {
+								p("text-danger") {
+									+"This submission was reported by ${sub.reportedBy}."
+									a("?id=${comp.id}&group=${encode(groupName, "UTF-8")}&action=clear") {
+										+"Clear this report."
+									}
+								}
+							}
+							pre { +sub.contents }
 							h2("d-inline-block") { +"$groupName Members" }
 							button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
 								id = "removegroup"

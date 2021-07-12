@@ -85,6 +85,19 @@ fun main() {
 		}
 	})
 	
+	document.getElementById("reportgroup")?.addEventListener("click", {
+		val xhr = XMLHttpRequest()
+		xhr.onreadystatechange = {
+			if (xhr.readyState == XMLHttpRequest.DONE && xhr.status.toInt() == 200) {
+				window.alert(xhr.responseText)
+			}
+		}
+		xhr.open("POST", window.location.pathname)
+		val params = URLSearchParams(window.location.search)
+		params.append("action", "reportgroup")
+		xhr.send(params)
+	})
+	
 	document.getElementById("removegroup")?.addEventListener("click", {
 		val xhr = XMLHttpRequest()
 		xhr.onreadystatechange = {

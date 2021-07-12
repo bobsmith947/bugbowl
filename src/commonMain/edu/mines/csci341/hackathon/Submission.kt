@@ -9,6 +9,7 @@ data class Submission(
 	val id: Int,
 	val contents: String,
 	val timestamp: Instant = Clock.System.now(),
+	var reportedBy: String? = null,
 ) {
 	var results: List<Pair<String, String>> = listOf()
 }

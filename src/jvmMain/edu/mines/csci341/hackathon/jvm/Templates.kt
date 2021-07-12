@@ -280,7 +280,10 @@ object Templates {
 				.sortedBy { it.second!!.timestamp }
 				.forEachIndexed { index, (group, sub) ->
 					listGroupAction("?id=${comp.id}&group=${encode(group, "UTF-8")}") {
-						+"#${index + 1} $group: ${sub!!.timestamp}"
+						if (sub!!.reportedBy != null) {
+							classes += "list-group-item-danger"
+						}
+						+"#${index + 1} $group: ${sub.timestamp}"
 					}
 				}
 		}
