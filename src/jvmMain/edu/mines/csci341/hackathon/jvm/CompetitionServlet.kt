@@ -93,7 +93,7 @@ class CompetitionServlet : HttpServlet() {
 			}
 			"reportgroup" -> {
 				val sub = comp.correctSubmissions[groupName]!!
-				res.setContentType("text/plain")
+				res.setContentType("text/plain;charset=UTF-8")
 				res.writer.use { out ->
 					if (sub.reportedBy == null) {
 						out.println("Submission successfully reported.")
