@@ -73,10 +73,7 @@ object SubmissionRunner : Runnable {
 		val outputs = MutableList<String>(inputs.size) { "null" }
 		program.assembleString(sub.contents)
 		inputs.forEachIndexed { index, input ->
-			// RARS doesn't actually read from the input string when making syscalls
-			// so we need to manually reassign stdin to the input string
-			System.setIn(input.byteInputStream())
-			program.setup(null, "")
+			program.setup(null, input)
 			val reason: Simulator.Reason = program.simulate()
 			if (Thread.interrupted()) {
 				// when the task times out, Simulator.stopExecution() forces program.simulate() to return
