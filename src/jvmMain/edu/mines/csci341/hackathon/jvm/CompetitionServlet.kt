@@ -1,5 +1,6 @@
 package edu.mines.csci341.hackathon.jvm
 
+import java.net.URLEncoder.encode
 import java.io.IOException
 import javax.servlet.ServletException
 import javax.servlet.annotation.WebServlet
@@ -17,6 +18,7 @@ class CompetitionServlet : HttpServlet() {
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int? = req.getParameter("id")?.toInt()
 		val groupName: String? = req.getParameter("group")
+		val action: String? = req.getParameter("action")
 		val user = req.getSession(false).getAttribute("user") as User
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
@@ -37,14 +39,18 @@ class CompetitionServlet : HttpServlet() {
 								res.sendError(HttpServletResponse.SC_FORBIDDEN)
 							} else {
 								h1 { +"$groupName Submission" }
+								if (action == "report") {
+									sub.reportedBy = sub.reportedBy ?: user.name
+								}
 								if (sub.reportedBy != null) {
 									p("text-danger") { +"This submission has been reported." }
+								} else {
+									a("?id=${comp.id}&group=${encode(groupName, "UTF-8")}&action=report",
+										classes = "btn btn-danger") {
+										+"Report this submission"
+									}
 								}
 								pre { +sub.contents }
-								button(type = ButtonType.button, classes = "btn btn-danger") {
-									id = "reportgroup"
-									+"Report this submission"
-								}
 							}
 						}
 					}
@@ -90,18 +96,6 @@ class CompetitionServlet : HttpServlet() {
 			}
 			"updategroup" -> {
 				Database.updateCompetition(comp)
-			}
-			"reportgroup" -> {
-				val sub = comp.correctSubmissions[groupName]!!
-				res.setContentType("text/plain;charset=UTF-8")
-				res.writer.use { out ->
-					if (sub.reportedBy == null) {
-						out.println("Submission successfully reported.")
-						sub.reportedBy = user.name
-					} else {
-						out.println("Submission has already been reported.")
-					}
-				}
 			}
 			else -> {
 				val contents = req.reader.use { it.readText() }
