@@ -4,6 +4,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.dom.clear
 import org.w3c.dom.*
+import org.w3c.dom.events.KeyboardEvent
 import org.w3c.dom.url.URLSearchParams
 import org.w3c.xhr.FormData
 import org.w3c.xhr.XMLHttpRequest
@@ -200,4 +201,19 @@ fun main() {
 		
 		xhr.send(formData)
 	})
+	
+	document.getElementsByTagName("textarea").asList().forEach { el ->
+		el.addEventListener("keydown", { ev ->
+			if ((ev as KeyboardEvent).key == "Tab") {
+				ev.preventDefault()
+				val textArea = ev.target as HTMLTextAreaElement
+				val text: String = textArea.value
+				val start: Int = textArea.selectionStart ?: 0
+				val end: Int = textArea.selectionEnd ?: 0
+				textArea.value = "${text.substring(0, start)}\t${text.substring(end)}"
+				textArea.selectionStart = start + 1
+				textArea.selectionEnd = start + 1
+			}
+		})
+	}
 }
