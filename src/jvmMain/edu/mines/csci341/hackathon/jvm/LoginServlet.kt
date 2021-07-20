@@ -10,13 +10,15 @@ class LoginServlet : HttpServlet() {
 		// invalidate previous session, if it exists
 		req.getSession(false)?.invalidate()
 		val session: HttpSession = req.getSession()
-		// TODO use multipass login
-		val userName = "admin"
-		val user = Database.getUser(userName)
+		// we are given the user's email but we only care about the part before the @
+		val user = req.remoteUser?.let { Database.getUser(it.substringBefore('@')) }
 		if (user == null) {
 			res.sendError(HttpServletResponse.SC_FORBIDDEN)
 		} else {
 			session.setAttribute("user", user)
+			// we need to manually add the session cookie for some reason
+			// this might have something to do with the request coming from the AJP connector
+			res.addCookie(Cookie("JSESSIONID", session.id))
 			if (user.isAdmin) {
 				res.sendRedirect("admin")
 			} else {
