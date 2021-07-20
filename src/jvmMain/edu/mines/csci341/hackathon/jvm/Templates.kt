@@ -112,6 +112,10 @@ object Templates {
 				+"Remove Competition"
 			}
 			makeRanking(comp)
+			p {
+				+"All participants:"
+				comp.participants.toSortedSet().forEach { +it.name }
+			}
 		} else {
 			h1 { +"New Competition" }
 		}
