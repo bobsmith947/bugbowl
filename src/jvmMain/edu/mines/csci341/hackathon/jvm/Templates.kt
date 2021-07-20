@@ -28,8 +28,8 @@ object Templates {
 	}
 	
 	fun BODY.makeNav(
-		current: String,
-		admin: Boolean
+		currentPage: String,
+		currentUser: User
 	) = nav("navbar navbar-expand navbar-dark bg-primary fixed-top") {
 		div("container") {
 			a("./", classes = "navbar-brand") { +APP_NAME }
@@ -37,16 +37,16 @@ object Templates {
 				ul("navbar-nav") {
 					li("nav-item") {
 						a("./competition", classes = "nav-link") {
-							if (current == "competition") {
+							if (currentPage == "competition") {
 								classes += "active"
 							}
 							+"Competitions"
 						}
 					}
-					if (admin) {
+					if (currentUser.isAdmin) {
 						li("nav-item") {
 							a("./admin", classes = "nav-link") {
-								if (current == "admin") {
+								if (currentPage == "admin") {
 									classes += "active"
 								}
 								+"Admin"
@@ -54,6 +54,7 @@ object Templates {
 						}
 					}
 				}
+				span("navbar-text") { +currentUser.name }
 			}
 		}
 	}

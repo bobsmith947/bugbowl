@@ -22,6 +22,7 @@ class AdminServlet : HttpServlet() {
 		val compId: Int? = req.getParameter("id")?.toInt()
 		val groupName: String? = req.getParameter("group")
 		val action: String? = req.getParameter("action")
+		val user = req.getSession(false).getAttribute("user") as User
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
@@ -29,7 +30,7 @@ class AdminServlet : HttpServlet() {
 				with(Templates) {
 					makeHead("Admin")
 					body {
-						makeNav("admin", true)
+						makeNav("admin", user)
 						if (compId == null) {
 							a("?id=0", classes = "btn btn-primary mt-3") { +"Add a competition" }
 							makeCompTable(edit = true)
