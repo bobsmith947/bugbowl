@@ -39,6 +39,7 @@ kotlin {
 			kotlin.srcDirs += 'src/jsMain'
 			dependencies {
 				implementation 'org.jetbrains.kotlinx:kotlinx-html-js:0.7.2'
+				implementation devNpm('compression-webpack-plugin', '>=8.0.1')
 			}
 		}
 		jvmMain {
