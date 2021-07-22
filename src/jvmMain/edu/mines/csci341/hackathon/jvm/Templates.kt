@@ -137,7 +137,7 @@ object Templates {
 					htmlFor = "description"
 					+"Description"
 				}
-				textArea("4", "40", TextAreaWrap.soft, "form-control") {
+				textArea("5", "100", TextAreaWrap.soft, "form-control") {
 					id = "description"
 					name = "description"
 					+(comp?.description ?: "")
@@ -148,7 +148,7 @@ object Templates {
 					htmlFor = "contents"
 					+"Base code contents"
 				}
-				textArea("8", "80", TextAreaWrap.soft, "form-control") {
+				textArea("10", "100", TextAreaWrap.soft, "form-control") {
 					id = "contents"
 					name = "contents"
 					spellCheck = false
@@ -160,7 +160,7 @@ object Templates {
 					htmlFor = "solution"
 					+"Solution code contents"
 				}
-				textArea("8", "80", TextAreaWrap.soft, "form-control") {
+				textArea("10", "100", TextAreaWrap.soft, "form-control") {
 					id = "solution"
 					name = "solutionContents"
 					spellCheck = false
@@ -229,7 +229,7 @@ object Templates {
 		h1 { +comp.title }
 		p { +comp.description }
 		if (comp.isActive) {
-			textArea("8", "80", TextAreaWrap.soft, "form-control") {
+			textArea("20", "100", TextAreaWrap.soft, "form-control") {
 				id = "contents"
 				spellCheck = false
 				+(comp.submissions[group]?.lastOrNull()?.contents ?: comp.contents)
