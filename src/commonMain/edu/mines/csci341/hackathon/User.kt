@@ -9,4 +9,5 @@ data class User(
 	val isAdmin: Boolean = false,
 ) : Comparable<User> {
 	override fun compareTo(other: User) = name.compareTo(other.name)
+	override fun toString() = name
 }

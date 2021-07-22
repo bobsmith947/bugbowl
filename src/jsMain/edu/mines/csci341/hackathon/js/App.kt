@@ -140,7 +140,7 @@ fun main() {
 						if (results[i].second == expected[i].second) {
 							classes += "table-success"
 						} else {
-							// TODO show tooltip with expected result
+							title = expected[i].second
 							classes += "table-danger"
 						}
 						+results[i].second

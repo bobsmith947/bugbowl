@@ -63,9 +63,9 @@ class CompetitionServlet : HttpServlet() {
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int = req.getParameter("id")!!.toInt()
 		val action: String? = req.getParameter("action")
-		var groupName: String? = req.getParameter("group")
 		val user = req.getSession(false).getAttribute("user") as User
 		val comp: Competition = Database.comps[compId]!!
+		var groupName: String? = req.getParameter("group") ?: comp.getGroupName(user)
 		if (!comp.isActive) {
 			res.sendError(HttpServletResponse.SC_FORBIDDEN)
 		} else when (action) {
@@ -92,7 +92,11 @@ class CompetitionServlet : HttpServlet() {
 				}
 			}
 			"leavegroup" -> {
-				comp.groups[comp.getGroupName(user)]!!.remove(user)
+				comp.groups[groupName]!!.remove(user)
+				if (comp.groups[groupName]!!.isEmpty()) {
+					comp.groups.remove(groupName)
+					comp.submissions.remove(groupName)
+				}
 			}
 			"updategroup" -> {
 				Database.updateCompetition(comp)
@@ -101,7 +105,7 @@ class CompetitionServlet : HttpServlet() {
 				val contents = req.reader.use { it.readText() }
 				val sub = Submission(0, contents)
 				val msg = SubmissionRunner.runSubmission(sub, comp.inputs)
-				comp.submissions[comp.getGroupName(user)]!!.add(sub)
+				comp.submissions[groupName]!!.add(sub)
 				res.setContentType("application/json;charset=UTF-8")
 				res.writer.use { out ->
 					out.println(Json.encodeToString(Triple(sub.results, comp.expectedResults, msg)))

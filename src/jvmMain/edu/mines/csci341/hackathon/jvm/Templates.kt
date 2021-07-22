@@ -113,8 +113,7 @@ object Templates {
 			}
 			makeRanking(comp)
 			p {
-				+"All participants:"
-				comp.participants.toSortedSet().forEach { +it.name }
+				+"All participants: ${comp.participants.toSortedSet()}"
 			}
 		} else {
 			h1 { +"New Competition" }
@@ -267,7 +266,6 @@ object Templates {
 					id = "joingroup"
 					size = "10"
 					option {
-						selected = true
 						value = ""
 						+"Join a group (click to refresh)"
 					}
