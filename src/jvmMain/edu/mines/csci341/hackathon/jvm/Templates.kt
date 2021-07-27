@@ -252,8 +252,8 @@ object Templates {
 					+"Leave this group"
 				}
 				ul("list-group") {
-					comp.groups[group]!!.forEach {
-						listGroupItem { +it.name }
+					comp.groups[group]!!.forEach { user ->
+						listGroupItem { +user.name }
 					}
 				}
 			} else {
@@ -267,9 +267,11 @@ object Templates {
 					size = "10"
 					option {
 						value = ""
-						+"Join a group (click to refresh)"
+						+"Join a group (click to update list)"
 					}
-					optGroup("Available Groups")
+					optGroup("Available Groups") {
+						comp.groups.keys.forEach { option { +it } }
+					}
 				}
 			}
 		} else makeRanking(comp)
