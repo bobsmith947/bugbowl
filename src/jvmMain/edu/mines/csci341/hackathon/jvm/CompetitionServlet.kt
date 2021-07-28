@@ -17,9 +17,10 @@ class CompetitionServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int? = req.getParameter("id")?.toInt()
-		val groupName: String? = req.getParameter("group")
+		val comp = Database.comps[compId]
 		val action: String? = req.getParameter("action")
-		val user = req.getSession(false).getAttribute("user") as User
+		val user = req.getSession().getAttribute("user") as User
+		val groupName: String? = req.getParameter("group") ?: comp?.getGroupName(user)
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
@@ -31,10 +32,9 @@ class CompetitionServlet : HttpServlet() {
 						if (compId == null) {
 							makeCompTable()
 						} else if (groupName == null) {
-							makeCompSubmit(compId, user)
+							makeCompSubmit(comp!!, groupName)
 						} else {
-							val comp = Database.comps[compId]!!
-							val sub = comp.correctSubmissions[groupName]!!
+							val sub = comp!!.correctSubmissions[groupName]!!
 							if (comp.isActive) {
 								res.sendError(HttpServletResponse.SC_FORBIDDEN)
 							} else {
@@ -62,9 +62,9 @@ class CompetitionServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doPost(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int = req.getParameter("id")!!.toInt()
-		val action: String? = req.getParameter("action")
-		val user = req.getSession(false).getAttribute("user") as User
 		val comp: Competition = Database.comps[compId]!!
+		val action: String? = req.getParameter("action")
+		val user = req.getSession().getAttribute("user") as User
 		var groupName: String? = req.getParameter("group") ?: comp.getGroupName(user)
 		if (!comp.isActive) {
 			res.sendError(HttpServletResponse.SC_FORBIDDEN)

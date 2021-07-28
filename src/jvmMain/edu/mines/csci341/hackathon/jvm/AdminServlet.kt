@@ -20,9 +20,10 @@ class AdminServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int? = req.getParameter("id")?.toInt()
+		val comp = Database.comps[compId]
 		val groupName: String? = req.getParameter("group")
 		val action: String? = req.getParameter("action")
-		val user = req.getSession(false).getAttribute("user") as User
+		val user = req.getSession().getAttribute("user") as User
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
@@ -35,10 +36,9 @@ class AdminServlet : HttpServlet() {
 							a("?id=0", classes = "btn btn-primary mt-3") { +"Add a competition" }
 							makeCompTable(edit = true)
 						} else if (groupName == null) {
-							makeCompEdit(compId)
+							makeCompEdit(comp)
 						} else {
-							val comp = Database.comps[compId]!!
-							val sub = comp.correctSubmissions[groupName]!!
+							val sub = comp!!.correctSubmissions[groupName]!!
 							h1 { +"$groupName Submission" }
 							if (action == "clear") {
 								sub.reportedBy = null

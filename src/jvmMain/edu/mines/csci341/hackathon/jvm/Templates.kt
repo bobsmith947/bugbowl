@@ -103,8 +103,7 @@ object Templates {
 		}
 	}
 	
-	fun BODY.makeCompEdit(compId: Int): Unit = makeCompEdit(Database.comps[compId])
-	fun BODY.makeCompEdit(comp: Competition?): Unit = div {
+	fun BODY.makeCompEdit(comp: Competition?) = div {
 		if (comp != null) {
 			h1("d-inline-block") { +"Edit Competition ${comp.id}" }
 			button(type = ButtonType.button, classes = "btn btn-danger mb-2") {
@@ -219,12 +218,7 @@ object Templates {
 		}
 	}
 	
-	fun BODY.makeCompSubmit(compId: Int, user: User): Unit {
-		val comp = Database.comps[compId]!!
-		val group = comp.getGroupName(user)
-		return makeCompSubmit(comp, group)
-	}
-	fun BODY.makeCompSubmit(comp: Competition, group: String?): Unit = div {
+	fun BODY.makeCompSubmit(comp: Competition, group: String?) = div {
 		h1 { +comp.title }
 		p { +comp.description }
 		if (comp.isActive) {
