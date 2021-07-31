@@ -3,6 +3,7 @@ package edu.mines.csci341.hackathon.jvm
 import kotlinx.html.*
 import edu.mines.csci341.hackathon.*
 import java.net.URLEncoder.encode
+import java.util.SortedMap
 
 object Templates {
 	const val APP_NAME = "BugBOWL"
@@ -60,7 +61,7 @@ object Templates {
 	}
 	
 	fun BODY.makeCompTable(
-		comps: List<Competition> = Database.comps.values.toList().sortedByDescending { it.created },
+		comps: List<Competition> = Database.comps.values.sortedByDescending { it.created },
 		edit: Boolean = false
 	) = table("table caption-top") {
 		caption("fs-1 fw-bold") { +"Competitions" }
@@ -100,6 +101,49 @@ object Templates {
 					}
 				}
 			}
+		}
+	}
+	
+	fun BODY.makeLeaderboard(
+		comps: List<Competition> = Database.comps.values.filter(Competition::isCurrent),
+		groups: Map<String, List<Submission?>> = comps.flatMap { it.correctSubmissions.toList() }
+			.groupBy({ it.first }, { it.second }),
+		scores: SortedMap<Int, TR.(Int) -> Unit> = sortedMapOf()
+	) = table("table table-bordered caption-top") {
+		caption("fs-1 fw-bold") { +"Leaderboard" }
+		tr {
+			// empty cell in top-left corner
+			th()
+			comps.forEach { th { +it.title } }
+		}
+		groups.forEach { (name, subs) ->
+			// give one point for each correct submission
+			var score = 0
+			subs.forEach { sub ->
+				score += if (sub != null) 1 else 0
+			}
+			// this function will create the group's row
+			val row: TR.(Int) -> Unit = { place ->
+				th { +"#$place $name" }
+				comps.forEach { comp ->
+					td {
+						if (comp.submissions.contains(name)) {
+							if (comp.submissions[name]!!.any { subs.contains(it) }) {
+								classes += "table-success"
+							} else {
+								classes += "table-warning"
+							}
+						} else {
+							classes += "table-danger"
+						}
+					}
+				}
+			}
+			scores.put(score, row)
+		}
+		// now that we know the proper order we can create the rows
+		scores.values.forEachIndexed { index, row ->
+			row(TR(mapOf(), consumer), index + 1)
 		}
 	}
 	
@@ -195,18 +239,14 @@ object Templates {
 					id = "input"
 					th { +"Input" }
 					comp?.expectedResults?.forEach { (input, _) ->
-						td {
-							textArea(content = input)
-						}
+						td { textArea(content = input) }
 					}
 				}
 				tr {
 					id = "output"
 					th { +"Output" }
 					comp?.expectedResults?.forEach { (_, output) ->
-						td {
-							textInput { value = output }
-						}
+						td { textInput { value = output } }
 					}
 				}
 			}

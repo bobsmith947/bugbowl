@@ -31,6 +31,7 @@ class CompetitionServlet : HttpServlet() {
 						makeNav("competition", user)
 						if (compId == null) {
 							makeCompTable()
+							makeLeaderboard()
 						} else if (groupName == null) {
 							makeCompSubmit(comp!!, groupName)
 						} else {

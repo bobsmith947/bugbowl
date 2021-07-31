@@ -10,8 +10,7 @@ data class Competition(
 	val description: String,
 	val contents: String,
 	val solutionContents: String? = null,
-	val created: LocalDate = Clock.System.now()
-		.toLocalDateTime(TimeZone.currentSystemDefault()).date,
+	val created: LocalDate = currentDateTime.date,
 	val activated: Pair<LocalDateTime, LocalDateTime>? = null,
 ) {
 	var expectedResults: List<Pair<String, String>> = listOf()
@@ -20,6 +19,9 @@ data class Competition(
 	
 	var isActive: Boolean = false
 		get() = field || checkActive()
+	
+	val isCurrent: Boolean
+		get() = semester == currentSemester
 	
 	val inputs: List<String>
 		get() = expectedResults.unzip().first
@@ -37,25 +39,18 @@ data class Competition(
 		}
 	
 	val semester: String
-		get() = when (created.monthNumber) {
-			in 1..4 -> "Spring ${created.year}"
-			in 5..7 -> "Summer ${created.year}"
-			in 8..12 -> "Fall ${created.year}"
-			else -> throw IllegalStateException()
-		}
+		get() = dateToSemester(created)
 	
 	fun checkSubmission(sub: Submission): Boolean {
 		return sub.results == expectedResults
 	}
 	
 	fun checkActive(): Boolean {
-		val current: LocalDateTime = Clock.System.now()
-			.toLocalDateTime(TimeZone.currentSystemDefault())
 		val default: LocalDateTime = Instant.DISTANT_FUTURE
-			.toLocalDateTime(TimeZone.currentSystemDefault())
+				.toLocalDateTime(TimeZone.currentSystemDefault())
 		val start: LocalDateTime = activated?.first ?: default
 		val end: LocalDateTime = activated?.second ?: default
-		return current in start..end
+		return currentDateTime in start..end
 	}
 	
 	fun getGroupName(user: User): String? {
@@ -65,5 +60,20 @@ data class Competition(
 			}
 		}
 		return null
+	}
+	
+	companion object {
+		val currentDateTime: LocalDateTime = Clock.System.now()
+				.toLocalDateTime(TimeZone.currentSystemDefault())
+		
+		val currentSemester: String
+			get() = dateToSemester(currentDateTime.date)
+		
+		fun dateToSemester(date: LocalDate) = when (date.monthNumber) {
+			in 1..4 -> "Spring ${date.year}"
+			in 5..7 -> "Summer ${date.year}"
+			in 8..12 -> "Fall ${date.year}"
+			else -> throw IllegalStateException()
+		}
 	}
 }
