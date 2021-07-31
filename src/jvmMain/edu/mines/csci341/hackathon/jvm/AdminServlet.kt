@@ -20,7 +20,7 @@ class AdminServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int? = req.getParameter("id")?.toInt()
-		val comp = Database.comps[compId]
+		val comp = compId?.let { Database.comps[compId] }
 		val groupName: String? = req.getParameter("group")
 		val action: String? = req.getParameter("action")
 		val user = req.getSession().getAttribute("user") as User

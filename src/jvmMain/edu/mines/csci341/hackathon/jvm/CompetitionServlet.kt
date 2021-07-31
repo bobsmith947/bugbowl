@@ -17,10 +17,10 @@ class CompetitionServlet : HttpServlet() {
 	@Throws(ServletException::class, IOException::class)
 	override fun doGet(req: HttpServletRequest, res: HttpServletResponse) {
 		val compId: Int? = req.getParameter("id")?.toInt()
-		val comp = Database.comps[compId]
+		val comp = compId?.let { Database.comps[compId] }
+		val groupName: String? = req.getParameter("group")
 		val action: String? = req.getParameter("action")
 		val user = req.getSession().getAttribute("user") as User
-		val groupName: String? = req.getParameter("group") ?: comp?.getGroupName(user)
 		res.setContentType("text/html;charset=UTF-8")
 		res.writer.use { out ->
 			out.println("<!DOCTYPE html>")
@@ -33,7 +33,7 @@ class CompetitionServlet : HttpServlet() {
 							makeCompTable()
 							makeLeaderboard()
 						} else if (groupName == null) {
-							makeCompSubmit(comp!!, groupName)
+							makeCompSubmit(comp!!, comp.getGroupName(user))
 						} else {
 							val sub = comp!!.correctSubmissions[groupName]!!
 							if (comp.isActive) {
