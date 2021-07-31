@@ -85,7 +85,7 @@ class CompetitionServlet : HttpServlet() {
 				if (groupName?.isBlank() ?: true) {
 					groupName = "Group ${comp.nextGroupNum}"
 				}
-				if (comp.groups.containsKey(groupName)) {
+				if (groupName in comp.groups) {
 					res.sendError(HttpServletResponse.SC_FORBIDDEN)
 				} else {
 					comp.groups[groupName!!] = mutableListOf(user)

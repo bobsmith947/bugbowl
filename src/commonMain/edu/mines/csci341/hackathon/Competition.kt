@@ -55,7 +55,7 @@ data class Competition(
 	
 	fun getGroupName(user: User): String? {
 		groups.forEach { (name, users) ->
-			if (users.contains(user)) {
+			if (user in users) {
 				return name
 			}
 		}

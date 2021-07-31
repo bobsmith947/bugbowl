@@ -27,7 +27,7 @@ object SubmissionRunner : Runnable {
 		// disable syscalls that we don't want students to use/there's no need to be used
 		// these include getcwd, open/close, lseek, as well as syscalls that wait for user input
 		val disabledSyscalls = setOf(17, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 62, 1024)
-		syscalls.removeIf { disabledSyscalls.contains(it.getNumber()) }
+		syscalls.removeIf { it.getNumber() in disabledSyscalls }
 		// enable custom printf syscall
 		syscalls.add(SyscallPrintF().apply {
 			setNumber(1025)

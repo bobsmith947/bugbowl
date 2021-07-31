@@ -3,7 +3,6 @@ package edu.mines.csci341.hackathon.jvm
 import kotlinx.html.*
 import edu.mines.csci341.hackathon.*
 import java.net.URLEncoder.encode
-import java.util.SortedMap
 
 object Templates {
 	const val APP_NAME = "BugBOWL"
@@ -108,7 +107,7 @@ object Templates {
 		comps: List<Competition> = Database.comps.values.filter(Competition::isCurrent),
 		groups: Map<String, List<Submission?>> = comps.flatMap { it.correctSubmissions.toList() }
 			.groupBy({ it.first }, { it.second }),
-		scores: SortedMap<Int, TR.(Int) -> Unit> = sortedMapOf()
+		scores: MutableList<Pair<Int, TR.(Int) -> Unit>> = mutableListOf()
 	) = table("table table-bordered caption-top") {
 		caption("fs-1 fw-bold") { +"Leaderboard" }
 		tr {
@@ -118,17 +117,16 @@ object Templates {
 		}
 		groups.forEach { (name, subs) ->
 			// give one point for each correct submission
-			var score = 0
-			subs.forEach { sub ->
-				score += if (sub != null) 1 else 0
+			val score: Int = subs.fold(0) { sum, sub ->
+				sub?.let { sum.inc() } ?: sum
 			}
 			// this function will create the group's row
 			val row: TR.(Int) -> Unit = { place ->
 				th { +"#$place $name" }
 				comps.forEach { comp ->
 					td {
-						if (comp.submissions.contains(name)) {
-							if (comp.submissions[name]!!.any { subs.contains(it) }) {
+						if (name in comp.submissions) {
+							if (comp.submissions[name]!!.any { it in subs }) {
 								classes += "table-success"
 							} else {
 								classes += "table-warning"
@@ -139,11 +137,12 @@ object Templates {
 					}
 				}
 			}
-			scores.put(score, row)
+			scores.add(score to row)
 		}
+		scores.sortByDescending { it.first }
 		// now that we know the proper order we can create the rows
-		scores.values.forEachIndexed { index, row ->
-			row(TR(mapOf(), consumer), index + 1)
+		scores.forEachIndexed { index, (_, row) ->
+			tr { row(index + 1) }
 		}
 	}
 	
