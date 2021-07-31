@@ -124,8 +124,10 @@ object Database {
 		val newComp = comp.copy(created = oldComp.created).apply {
 			expectedResults = comp.expectedResults
 			oldComp.groups.mapValuesTo(groups) { it.value.toMutableList() }
-			oldComp.submissions.mapValuesTo(submissions) {
-				it.value.filter(::checkSubmission).toMutableList()
+			oldComp.submissions.mapValuesTo(submissions) { (_, subs) ->
+				val correct = subs.filter(::checkSubmission)
+				// use the last submission if there are no correct submissions
+				(if (correct.isEmpty()) subs.takeLast(1) else correct).toMutableList()
 			}
 			isActive = comp.isActive
 		}
