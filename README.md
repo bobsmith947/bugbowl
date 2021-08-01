@@ -19,6 +19,10 @@ The `REMOTE_USER` environment variable is used to determine the identity of the 
 
 `val user = User(0, "admin", true)`
 
+### RARS Output Formatting
+
+There is a custom syscall available (number 1025) that can be used to format the output of RARS programs. It works similar to the Java `printf` function, but with an additional `u` conversion for unsigned integers. Register `a0` contains a pointer to a null-terminated format string, registers `a1-a6` (or the corresponding floating point registers) contain the positional arguments (indexed arguments are not supported), and register `a7` contains the value 1025. It is then called with `ecall` like any other syscall.
+
 ## Deploying
 
 If you wish to deploy the app to your own server, you may want to consider serving it behind a proxy, so as not to expose your Tomcat instance to the public. This will also allow you to configure a SSO service provider as previously mentioned. For example, in `httpd.conf` you would put:
